@@ -110,7 +110,7 @@
     <div class="control-panel">
       <button>Neues Spiel</button>
       <button onclick="solveSudoku()">Lösung zeigen</button>
-      <button onclick="checkSudoku()">Prüfen</button>
+      <button onclick="checkIfValid()">Prüfen</button>
     </div>
     <canvas id="sudoku-canvas" width="900px" height="900px"></canvas>
 	<div id="number-selector">
@@ -154,8 +154,11 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 ctx.strokeStyle = lineColor;
 ctx.lineWidth = 1;
 
+// Konstanten
+const maxLength = 9;
+
 // Zeichne die horizontalen Linien
-for (var i = 0; i <= 9; i++) {
+for (var i = 0; i <= maxLength; i++) {
     var y = i * cellSize;
     ctx.beginPath();
     ctx.moveTo(0, y);
@@ -169,7 +172,7 @@ for (var i = 0; i <= 9; i++) {
 }
 
 // Zeichne die vertikalen Linien
-for (var j = 0; j <= 9; j++) {
+for (var j = 0; j <= maxLength; j++) {
     var x = j * cellSize;
     ctx.beginPath();
     ctx.moveTo(x, 0);
@@ -199,15 +202,15 @@ request.onload = function() {
 request.send();
 
 function resetColors() {
-    for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
+    for (var i = 0; i < maxLength; i++) {
+        for (var j = 0; j < maxLength; j++) {
             markField(i, j, bgColor); // Setze die Hintergrundfarbe auf die normale Farbe
         }
     }
 }
 
 function resetLines() {
-    for (var i = 0; i <= 9; i++) {
+    for (var i = 0; i <= maxLength; i++) {
         var y = i * cellSize;
         ctx.beginPath();
         ctx.moveTo(0, y);
@@ -219,7 +222,7 @@ function resetLines() {
             ctx.lineWidth = 1; // Setze die Linienbreite auf den Standardwert 1
         }
     }
-    for (var j = 0; j <= 9; j++) {
+    for (var j = 0; j <= maxLength; j++) {
         var x = j * cellSize;
         ctx.beginPath();
         ctx.moveTo(x, 0);
@@ -240,10 +243,10 @@ function drawNumbers() {
     ctx.fillStyle = lineColor;
 
     // Gehe durch jede Zelle des Sudoku Rasters
-    for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
+    for (var i = 0; i < maxLength; i++) {
+        for (var j = 0; j < maxLength; j++) {
             // Hole den Index der aktuellen Zelle im sudokuData Array
-            var index = i * 9 + j;
+            var index = i * maxLength + j;
             // Hole den Wert der aktuellen Zelle im sudokuData Array
             var value = sudokuData[index];
             // Wenn der Wert nicht leer ist, zeichne ihn in der Mitte der Zelle
@@ -292,7 +295,7 @@ function markField(row, column, color) {
 
     ctx.fillStyle = "black";
 
-    var index = row * 9 + column;
+    var index = row * maxLength + column;
     var value = sudokuData[index];
     var x = column * cellSize + cellSize / 2;
     var y = row * cellSize + cellSize / 2;
@@ -304,12 +307,12 @@ function markField(row, column, color) {
 // Eine Funktion, um die gesamte Zeile und Spalte im Sudoku zu markieren
 function markRowAndColumn(row, column, color) {
     // Markiere jedes Feld in der Zeile
-    for (var j = 0; j < 9; j++) {
+    for (var j = 0; j < maxLength; j++) {
         markField(row, j, color);
     }
 
     // Markiere jedes Feld in der Spalte
-    for (var i = 0; i < 9; i++) {
+    for (var i = 0; i < maxLength; i++) {
         markField(i, column, color);
     }
 }
@@ -327,14 +330,17 @@ canvas.addEventListener("click", function(event) {
 
     // Rufe eine Funktion auf, um das Feld zu markieren oder andere Aktionen durchzuführen
     console.log("CLICK" + isFixedCell(row, column));
+	
     if (!isFixedCell(row, column)) {
+		if (!checkIfValidPos(row, column)) {
+            sudokuData[row * maxLength + column] = " ";
+        }
         resetColors();
         markBox(row, column, "#e2ebf3");
         markRowAndColumn(row, column, "#e2ebf3");
         markField(row, column, "#bbdefb");
         resetLines();
     }
-
 });
 
 
@@ -363,75 +369,89 @@ function writeNumber(row, column, value) {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(value, x, y);
-    sudokuData[row * 9 + column] = value.toString();
+    sudokuData[row * maxLength + column] = value.toString();
 }
 
 
 function isFixedCell(row, column) {
-    var index = row * 9 + column;
+    var index = row * maxLength + column;
     var value = sudokuDataRaw[index];
     if (value !== " ") {
-        console.log("isFixedCell Raw" + sudokuDataRaw[index]);
-        console.log("isFixedCell " + sudokuData[index]);
         return true;
-
     } else {
         return false;
     }
 }
 
-function checkRowAndColumn(row, column) {
-  var value = sudokuData[row * 9 + column];
-
-  // Überprüfe die Zeile
-  for (var c = 0; c < 9; c++) {
-    if (c !== column && sudokuData[row * 9 + c] === value) {
-		if (value !== " ") {
-      markField(row, c, "#f7cfd6");
-                resetLines();
-                if (!isFixedCell(row, column)) {
-                    sudokuData[row * 9 + column] = " ";
-                }
-		}
-		
+function checkIfValidPos(row, column) {
+	ifValid=true;
+	var index = row * maxLength + column;
+    var value = sudokuData[index];
+  // Überprüfe die Zeile (row)
+  for (var c = 0; c < maxLength; c++) {
+    if (sudokuData[row * maxLength + c] === value && c !== column) {
+      ifValid=false; // Wert bereits in der Zeile vorhanden
     }
   }
 
-  // Überprüfe die Spalte
-  for (var r = 0; r < 9; r++) {
-    if (r !== row && sudokuData[r * 9 + column] === value) {
-		if (value !== " ") {
-      markField(r, column, "#f7cfd6");
-                resetLines();
-                if (!isFixedCell(row, column)) {
-                    sudokuData[row * 9 + column] = " ";
-                }
-		}
+  // Überprüfe die Spalte (column)
+  for (var r = 0; r < maxLength; r++) {
+    if (sudokuData[r * maxLength + column] === value && r !== row) {
+      ifValid=false; // Wert bereits in der Spalte vorhanden
     }
   }
-}
 
-// Funktion, um das Sudoku zu überprüfen
-function checkSudoku() {
-  resetColors(); // Setze die Farben zurück
+  // Überprüfe den 3x3-Kasten
+  var boxRow = Math.floor(row / 3) * 3; // Erste Zeile des Kastens
+  var boxColumn = Math.floor(column / 3) * 3; // Erste Spalte des Kastens
 
-  // Überprüfe jede Zelle im Sudoku
-  for (var row = 0; row < 9; row++) {
-    for (var column = 0; column < 9; column++) {
-      checkRowAndColumn(row, column);
+  for (var r = boxRow; r < boxRow + 3; r++) {
+    for (var c = boxColumn; c < boxColumn + 3; c++) {
+      if (sudokuData[r * maxLength + c] === value && (r !== row || c !== column)) {
+        ifValid=false; // Wert bereits im Kasten vorhanden
+      }
     }
   }
+  return ifValid;
 }
 
 // Eine Funktion, um alle Zahlen im Sudoku zu überprüfen und doppelte Zahlen rot zu markieren
 function checkIfValid() {
-    // Überprüfe die kleinen 3x3-Kästen
-    for (var boxRow = 0; boxRow < 9; boxRow += 3) {
-        for (var boxColumn = 0; boxColumn < 9; boxColumn += 3) {
+	// Überprüfe jede Zelle im Sudoku
+  for (var row = 0; row < maxLength; row++) {
+    for (var column = 0; column < maxLength; column++) {
+      checkRowAndColumn(row, column);
+    }
+  }
+  
+  
+function checkRowAndColumn(row, column) {
+  var value = sudokuData[row * maxLength + column];
+  // Überprüfe die Zeile
+  for (var c = 0; c < maxLength; c++) {
+    if (c !== column && sudokuData[row * maxLength + c] === value) {
+		if (value !== " ") {
+                markField(row, c, "#f7cfd6");
+		}
+    }
+  }
+  // Überprüfe die Spalte
+  for (var r = 0; r < maxLength; r++) {
+	  
+    if (r !== row && sudokuData[r * maxLength + column] === value) {
+		if (value !== " ") {
+                markField(r, column, "#f7cfd6");
+		}
+    }
+  }
+}
+  // Überprüfe die kleinen 3x3-Kästen
+    for (var boxRow = 0; boxRow < maxLength; boxRow += 3) {
+        for (var boxColumn = 0; boxColumn < maxLength; boxColumn += 3) {
             var numbersInBox = new Set();
             for (var i = boxRow; i < boxRow + 3; i++) {
                 for (var j = boxColumn; j < boxColumn + 3; j++) {
-                    var value = sudokuData[i * 9 + j];
+                    var value = sudokuData[i * maxLength + j];
                     if (value !== " ") {
                         if (numbersInBox.has(value)) {
                             markFieldsInBox(boxRow, boxColumn, value, "#f7cfd6");
@@ -444,133 +464,114 @@ function checkIfValid() {
         }
     }
 
-    // Überprüfe die Zeile
-    for (var row = 0; row < 9; row++) {
-        var numbersInRow = new Set();
-        for (var column = 0; column < 9; column++) {
-            var value = sudokuData[row * 9 + column];
-            if (value !== " ") {
-                if (numbersInRow.has(value)) {
-                    markFieldsInRow(row, value, "#f7cfd6");
-                } else {
-                    numbersInRow.add(value);
-                }
-            }
-        }
-    }
-
-    // Überprüfe die Spalten
-    for (var column = 0; column < 9; column++) {
-        var numbersInColumn = new Set();
-        for (var row = 0; row < 9; row++) {
-            var value = sudokuData[row * 9 + column];
-            if (value !== " ") {
-				console.log("COLUMN" + value);
-                if (numbersInColumn.has(value)) {
-                    markFieldsInColumn(column, value, "#f7cfd6");
-                } else {
-                    numbersInColumn.add(value);
-                }
-            }
-        }
-    }
-
-
-    // Eine Hilfsfunktion, um alle Felder im gleichen 3x3-Kasten mit einer bestimmten Zahl zu markieren
+	// Eine Hilfsfunktion, um alle Felder im gleichen 3x3-Kasten mit einer bestimmten Zahl zu markieren
     function markFieldsInBox(boxRow, boxColumn, number, color) {
         for (var i = boxRow; i < boxRow + 3; i++) {
             for (var j = boxColumn; j < boxColumn + 3; j++) {
-                if (sudokuData[i * 9 + j] === number) {
+                if (sudokuData[i * maxLength + j] === number) {
                     markField(i, j, color);
                     resetLines();
-                    console.log(sudokuData[i * 9 + j]);
-                    console.log("A" + sudokuDataRaw[i * 9 + j]);
-                    console.log("A" + number);
-                    if (!isFixedCell(i, j)) {
-                        console.log(sudokuData[i * 9 + j]);
-                        console.log("B" + sudokuDataRaw[i * 9 + j]);
-                        console.log("B" + number);
-                        sudokuData[i * 9 + j] = " ";
-                    }
                 }
             }
         }
     }
 
-    // Eine Hilfsfunktion, um alle Felder in derselben Reihe mit einer bestimmten Zahl zu markieren
-    function markFieldsInRow(row, number, color) {
-        for (var column = 0; column < 9; column++) {
-            if (sudokuData[row * 9 + column] === number) {
-                markField(row, column, color);
-                resetLines();
-                if (!isFixedCell(row, column)) {
-                    sudokuData[row * 9 + column] = " ";
-                }
-            }
-        }
-    }
-
-    // Eine Hilfsfunktion, um alle Felder in derselben Spalte mit einer bestimmten Zahl zu markieren
-    function markFieldsInColumn(column, number, color) {
-        for (var row = 0; row < 9; row++) {
-            if (sudokuData[row * 9 + column] === number) {
-                markField(row, column, color);
-                resetLines();
-                if (!isFixedCell(row, column)) {
-                    sudokuData[row * 9 + column] = " ";
-                }
-            }
-        }
-    }
+	resetLines();
 }
 
-// Eine Funktion, um das Sudoku zu lösen
+
+
 function solveSudoku() {
-    // Finde eine leere Zelle im Sudoku
-    var emptyCell = findEmptyCell();
+  // Finde die nächste leere Zelle im Sudoku
+  var emptyCell = findEmptyCell();
 
-    // Wenn keine leere Zelle mehr gefunden wurde, ist das Sudoku gelöst
-    if (!emptyCell) {
-        return true;
+  // Wenn keine leere Zelle gefunden wurde, ist das Sudoku gelöst
+  if (!emptyCell) {
+    alert("Das Sudoku wurde gelöst!");
+    return;
+  }
+
+  var row = emptyCell.row;
+  var column = emptyCell.column;
+
+  // Probiere Zahlen von 1 bis maxLength aus, um die leere Zelle zu füllen
+  for (var number = 1; number <= maxLength; number++) {
+    // Überprüfe, ob die aktuelle Zahl in der aktuellen Zelle gültig ist
+    if (isValidNumber(row, column, number)) {
+      // Setze die Zahl in die aktuelle Zelle
+      sudokuData[row * maxLength + column] = number.toString();
+
+      // Löse das Sudoku rekursiv, indem du zur nächsten leeren Zelle gehst
+      solveSudoku();
+
+      // Wenn das Sudoku gelöst wurde, beende die Schleife und die Funktion
+      if (isSudokuSolved()) {
+        return;
+      }
+
+      // Wenn das Sudoku nicht gelöst wurde, setze die Zelle zurück und probiere die nächste Zahl
+      sudokuData[row * maxLength + column] = " ";
     }
-
-    var row = emptyCell.row;
-    var column = emptyCell.column;
-
-    // Probiere Zahlen von 1 bis 9 aus
-    for (var number = 1; number <= 9; number++) {
-        // Überprüfe, ob die Zahl an dieser Position gültig ist
-        if (checkIfValid()) {
-            // Setze die Zahl an dieser Position im Sudoku
-            sudokuData[row * 9 + column] = number.toString();
-
-            // Versuche, das Sudoku mit der gesetzten Zahl weiter zu lösen (rekursiver Aufruf)
-            if (solveSudoku()) {
-                return true; // Das Sudoku wurde gelöst
-            }
-
-            // Wenn die Zahl zu keiner Lösung führt, setze die Zelle zurück
-            sudokuData[row * 9 + column] = " ";
-        }
-    }
-
-    return false; // Es wurde keine Lösung gefunden
+  }
 }
 
-// Eine Hilfsfunktion, um eine leere Zelle im Sudoku zu finden
+// Eine Funktion, um die nächste leere Zelle im Sudoku zu finden
 function findEmptyCell() {
-    for (var row = 0; row < 9; row++) {
-        for (var column = 0; column < 9; column++) {
-            if (sudokuData[row * 9 + column] === " ") {
-                return {
-                    row: row,
-                    column: column
-                };
-            }
-        }
+  for (var row = 0; row < maxLength; row++) {
+    for (var column = 0; column < maxLength; column++) {
+      if (sudokuData[row * maxLength + column] === " ") {
+        return { row: row, column: column };
+      }
     }
-
-    return null; // Es wurden keine leeren Zellen gefunden
+  }
+  return null;
 }
+
+// Eine Funktion, um zu überprüfen, ob eine Zahl in einer bestimmten Zelle gültig ist
+function isValidNumber(row, column, number) {
+  // Überprüfe die Zeile und Spalte
+  for (var i = 0; i < maxLength; i++) {
+    if (
+      sudokuData[row * maxLength + i] === number.toString() ||
+      sudokuData[i * maxLength + column] === number.toString()
+    ) {
+      return false;
+    }
+  }
+
+  // Überprüfe das 3x3-Unterquadrat
+  var boxRow = Math.floor(row / 3) * 3;
+  var boxColumn = Math.floor(column / 3) * 3;
+  for (var i = boxRow; i < boxRow + 3; i++) {
+    for (var j = boxColumn; j < boxColumn + 3; j++) {
+      if (sudokuData[i * maxLength + j] === number.toString()) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+// Eine Funktion, um zu überprüfen, ob das Sudoku gelöst wurde
+function isSudokuSolved() {
+  for (var i = 0; i < maxLength; i++) {
+    for (var j = 0; j < maxLength; j++) {
+      if (sudokuData[i * maxLength + j] === " ") {
+        return false;
+      }
+    }
+  }
+  resetColors();
+  resetLines();
+  return true;
+}
+
+// TODO:
+//- Selbst hinzugefügte Zahlen anders färben
+//- Sudoku random chooser
+//- Login
+//- Stats
+//- Methoden vereinfachen
 
 </script>
