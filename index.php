@@ -101,7 +101,7 @@
 <body>
   <header>
   <title>Sudoku</title>
-    <h1>Sudoku</h1>
+    <h1>Sudoku</h1><span id="sudokuIdElement"></span>
     <ul>
       <li><a href="#">Home</a></li>
     </ul>
@@ -185,19 +185,29 @@ for (var j = 0; j <= maxLength; j++) {
     }
 }
 
-// Lese die Sudoku Daten aus der Datei sudoku.txt
+filename = "sudoku.txt";
+
 var sudokuData = [];
 var sudokuDataRaw = [];
+var sudokuDataSplit = [];
+var randomIndex = 0;
 var request = new XMLHttpRequest();
-request.open("GET", "sudoku.txt", true);
+request.open("GET", filename, true);
 request.onload = function() {
-    if (request.status >= 200 && request.status < 400) {
-        // Konvertiere die Daten in ein Array von Zahlen und Leerzeichen
-        sudokuData = request.responseText.split(";");
-        sudokuDataRaw = JSON.parse(JSON.stringify(sudokuData));
-        // Zeichne die Zahlen auf dem Sudoku Raster
-        drawNumbers();
-    }
+  if (request.status >= 200 && request.status < 400) {
+    // Konvertiere die Daten in ein Array von Zahlen und Leerzeichen
+    sudokuDataSplit = request.responseText.split("][");
+    var randomIndex = Math.floor(Math.random() * sudokuDataRaw.length); // Zufälliger Index auswählen
+    sudokuDataRaw = sudokuDataSplit[randomIndex].split(";");
+	sudokuData = JSON.parse(JSON.stringify(sudokuDataRaw));
+    // Zeichne die Zahlen auf dem Sudoku Raster
+    drawNumbers();
+	
+	// Zeige die ID des Sudokus an
+    var sudokuId = randomIndex + 1; // Index beginnt bei 0, deshalb +1
+	var sudokuIdElement = document.getElementById("sudokuIdElement");
+        sudokuIdElement.textContent = "Sudoku ID: " + sudokuId;
+  }
 };
 request.send();
 
@@ -283,7 +293,7 @@ function markField(row, column, color) {
     markedField = {
         row: row,
         column: column
-    }; // NEUUUU
+    };
     // Setze die Hintergrundfarbe des markierten Feldes
     ctx.fillStyle = color;
     ctx.fillRect(x, y, cellSize, cellSize);
@@ -293,10 +303,13 @@ function markField(row, column, color) {
     ctx.lineWidth = 1;
     ctx.strokeRect(x, y, cellSize, cellSize);
 
-    ctx.fillStyle = "black";
-
     var index = row * maxLength + column;
     var value = sudokuData[index];
+	if (sudokuDataRaw[index] !== value.toString()) {
+    ctx.fillStyle = "#0b79e4"; // Blaue Farbe für Zahlen, die nicht in sudokuDataRaw sind
+  } else {
+    ctx.fillStyle = lineColor; // Standardfarbe für Zahlen in sudokuDataRaw
+  }
     var x = column * cellSize + cellSize / 2;
     var y = row * cellSize + cellSize / 2;
     ctx.textAlign = "center";
@@ -365,7 +378,11 @@ function writeNumber(row, column, value) {
     var x = column * cellSize + cellSize / 2;
     var y = row * cellSize + cellSize / 2;
     ctx.font = "50px Arial";
-    ctx.fillStyle = lineColor;
+    if (sudokuDataRaw[value] !== value.toString()) {
+    ctx.fillStyle = "#0b79e4"; // Blaue Farbe für Zahlen, die nicht in sudokuDataRaw sind
+  } else {
+    ctx.fillStyle = lineColor; // Standardfarbe für Zahlen in sudokuDataRaw
+  }
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(value, x, y);
@@ -568,8 +585,6 @@ function isSudokuSolved() {
 }
 
 // TODO:
-//- Selbst hinzugefügte Zahlen anders färben
-//- Sudoku random chooser
 //- Login
 //- Stats
 //- Methoden vereinfachen
