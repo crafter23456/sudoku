@@ -1,134 +1,287 @@
 <html>
-<head>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
-      margin: 0;
-      padding: 0;
-    }
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+      }
 
-    header {
-      background-color: #333;
-      color: white;
-      height: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-    }
+      header {
+        background-color: #333;
+        color: white;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+      }
 
-    header h1 {
-      font-size: 36px;
-    }
+      header h1 {
+        font-size: 36px;
+      }
 
-    header ul {
-      list-style: none;
-      display: flex;
-    }
+      header ul {
+        list-style: none;
+        display: flex;
+      }
 
-    header li {
-      margin-left: 20px;
-    }
+      header li {
+        margin-left: 20px;
+      }
 
-    header a {
-      color: white;
-      text-decoration: none;
-    }
+      header a {
+        color: white;
+        text-decoration: none;
+      }
 
-    footer {
-      background-color: #333;
-      color: white;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+      footer {
+        background-color: #333;
+        color: white;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-    main {
-      display: grid;
-      grid-template-columns: 1fr 3fr;
-      grid-gap: 20px;
-      padding: 20px;
-    }
+      main {
+        display: flex;
+        grid-gap: 20px;
+        padding: 20px;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+      }
 
-    canvas {
-      border: 1px solid black;
-    }
+      canvas {
+        border: 1px solid black;
+      }
 
-    .control-panel {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+      .control-panel {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 20px;
+        border-radius: 40px;
+        flex-direction: row;
+        justify-content: center;
+      }
 
-    .control-panel button {
-      width: 100px;
-      height: 40px;
-      margin-bottom: 10px;
-    }
-	.number-selector {
-    position: relative;
-    display: flex;
-    width: 20%;
-    height: 20%;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-	position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    flex-wrap: wrap;
-    justify-content: stretch;
-}
+      .control-panel button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 40px;
+        background-color: #eaeaea;
+        color: #333;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        width: 6rem;
+        height: 4rem;
+      }
 
-.number {
-    display: inline-block;
-  width: 30px;
-  height: 30px;
-  border: 1px solid #000;
-  margin: 5px;
-  text-align: center;
-  cursor: pointer;
-}
-.number:hover {
-  background-color: #ccc;
-}
-  </style>
-</head>
-<body>
-  <header>
-  <title>Sudoku</title>
-    <h1>Sudoku</h1><span id="sudokuIdElement"></span>
-    <ul>
-      <li><a href="#">Home</a></li>
-    </ul>
-  </header>
-  <main>
-    <div class="control-panel">
-      <button>Neues Spiel</button>
-      <button onclick="solveSudoku()">Lösung zeigen</button>
-      <button onclick="checkIfValid()">Prüfen</button>
-    </div>
-    <canvas id="sudoku-canvas" width="900px" height="900px"></canvas>
-	<div id="number-selector">
-  <div class="number" data-value="1">1</div>
-  <div class="number" data-value="2">2</div>
-  <div class="number" data-value="3">3</div>
-  <div class="number" data-value="4">4</div>
-  <div class="number" data-value="5">5</div>
-  <div class="number" data-value="6">6</div>
-  <div class="number" data-value="7">7</div>
-  <div class="number" data-value="8">8</div>
-  <div class="number" data-value="9">9</div>
-</div>
-  </main>
-  <footer>
-    &copy; 2023 Sudoku-Website. Alle Rechte vorbehalten.
-  </footer>
-</body>
+      .control-panel button:hover {
+        background-color: #ccc;
+      }
+
+      .number-selector {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 10px 0px;
+        justify-items: center;
+        align-items: center;
+      }
+
+      .number {
+        width: 7rem;
+        height: 7rem;
+        background-color: #eaeaea;
+        border-radius: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        font-size: 35px;
+        /* flex-basis: 31%; */
+        margin: 1%;
+      }
+
+      .number:hover {
+        background-color: #c9c9c9;
+      }
+
+      .popup-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+      }
+
+      .login-container {
+        width: 300px;
+        padding: 20px;
+        border-radius: 5px;
+        background-color: #eaeaea;
+        text-align: center;
+      }
+
+      .login-container h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+      }
+
+      .login-container form {
+        display: grid;
+        grid-gap: 10px;
+        text-align: left;
+      }
+
+      .login-container label {
+        font-weight: bold;
+      }
+
+      .login-container input[type="text"],
+      .login-container input[type="password"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      .login-container input[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        background-color: #4caf50;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .login-container input[type="submit"]:hover {
+        background-color: #45a049;
+      }
+
+      #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        display: none;
+      }
+
+      .popup-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+      }
+
+      .popup-content {
+        width: 300px;
+        padding: 20px;
+        border-radius: 5px;
+        background-color: #eaeaea;
+        text-align: center;
+      }
+
+      .popup-content p {
+        font-size: 24px;
+        margin-bottom: 20px;
+      }
+
+      .popup-content button {
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        background-color: #4caf50;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .popup-content button:hover {
+        background-color: #45a049;
+      }
+    </style>
+    <title>Sudoku</title>
+  </head>
+  <body>
+    <header>
+      <h1>Sudoku</h1>
+      <span id="sudokuIdElement"></span>
+      <ul>
+        <li>
+          <a href="#">Home</a>
+        </li>
+        <li>
+          <a href="#" onclick="showLoginPopup()">Login</a>
+        </li>
+      </ul>
+    </header>
+    <main>
+      <div>
+        <canvas id="sudoku-canvas" width="900px" height="900px"></canvas>
+      </div>
+      <div>
+        <div class="control-panel">
+          <button onClick="window.location.reload()">Neues Spiel</button>
+          <button onclick="solveSudoku()">Lösung zeigen</button>
+          <button onclick="checkIfValid()">Prüfen</button>
+        </div>
+        <div class="number-selector">
+          <div class="number" data-value="1">1</div>
+          <div class="number" data-value="2">2</div>
+          <div class="number" data-value="3">3</div>
+          <div class="number" data-value="4">4</div>
+          <div class="number" data-value="5">5</div>
+          <div class="number" data-value="6">6</div>
+          <div class="number" data-value="7">7</div>
+          <div class="number" data-value="8">8</div>
+          <div class="number" data-value="9">9</div>
+        </div>
+      </div>
+      <div class="popup-container" id="loginPopup" style="display: none;">
+        <div class="login-container">
+          <h1>Login</h1>
+          <form action="login.php" method="POST">
+            <label for="username">Benutzername:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Passwort:</label>
+            <input type="password" id="password" name="password" required>
+            <input type="submit" value="Anmelden">
+          </form>
+        </div>
+      </div>
+      <div id="overlay"></div>
+      <div class="popup-container" id="popupContainer" style="display: none;">
+        <div class="popup-content">
+          <p id="popup-message">Das Sudoku wurde gelöst!</p>
+          <button id="popup-close">Schließen</button>
+        </div>
+      </div>
+    </main>
+    <footer> &copy; 2023 Sudoku-Website. Alle Rechte vorbehalten. </footer>
+  </body>
 </html>
 
 
@@ -194,20 +347,20 @@ var randomIndex = 0;
 var request = new XMLHttpRequest();
 request.open("GET", filename, true);
 request.onload = function() {
-  if (request.status >= 200 && request.status < 400) {
-    // Konvertiere die Daten in ein Array von Zahlen und Leerzeichen
-    sudokuDataSplit = request.responseText.split("][");
-    var randomIndex = Math.floor(Math.random() * sudokuDataRaw.length); // Zufälliger Index auswählen
-    sudokuDataRaw = sudokuDataSplit[randomIndex].split(";");
-	sudokuData = JSON.parse(JSON.stringify(sudokuDataRaw));
-    // Zeichne die Zahlen auf dem Sudoku Raster
-    drawNumbers();
-	
-	// Zeige die ID des Sudokus an
-    var sudokuId = randomIndex + 1; // Index beginnt bei 0, deshalb +1
-	var sudokuIdElement = document.getElementById("sudokuIdElement");
+    if (request.status >= 200 && request.status < 400) {
+        // Konvertiere die Daten in ein Array von Zahlen und Leerzeichen
+        sudokuDataSplit = request.responseText.split("][");
+        var randomIndex = Math.floor(Math.random() * sudokuDataSplit.length); // Zufälliger Index auswählen
+        sudokuDataRaw = sudokuDataSplit[randomIndex].split(";");
+        sudokuData = JSON.parse(JSON.stringify(sudokuDataRaw));
+        // Zeichne die Zahlen auf dem Sudoku Raster
+        drawNumbers();
+        console.log(randomIndex);
+        // Zeige die ID des Sudokus an
+        var sudokuId = randomIndex + 1; // Index beginnt bei 0, deshalb +1
+        var sudokuIdElement = document.getElementById("sudokuIdElement");
         sudokuIdElement.textContent = "Sudoku ID: " + sudokuId;
-  }
+    }
 };
 request.send();
 
@@ -251,7 +404,6 @@ function drawNumbers() {
     // Definiere die Schriftart und die Farbe für die Zahlen
     ctx.font = "50px Arial";
     ctx.fillStyle = lineColor;
-
     // Gehe durch jede Zelle des Sudoku Rasters
     for (var i = 0; i < maxLength; i++) {
         for (var j = 0; j < maxLength; j++) {
@@ -305,11 +457,11 @@ function markField(row, column, color) {
 
     var index = row * maxLength + column;
     var value = sudokuData[index];
-	if (sudokuDataRaw[index] !== value.toString()) {
-    ctx.fillStyle = "#0b79e4"; // Blaue Farbe für Zahlen, die nicht in sudokuDataRaw sind
-  } else {
-    ctx.fillStyle = lineColor; // Standardfarbe für Zahlen in sudokuDataRaw
-  }
+    if (sudokuDataRaw[index] !== value.toString()) {
+        ctx.fillStyle = "#0b79e4"; // Blaue Farbe für Zahlen, die nicht in sudokuDataRaw sind
+    } else {
+        ctx.fillStyle = lineColor; // Standardfarbe für Zahlen in sudokuDataRaw
+    }
     var x = column * cellSize + cellSize / 2;
     var y = row * cellSize + cellSize / 2;
     ctx.textAlign = "center";
@@ -343,10 +495,15 @@ canvas.addEventListener("click", function(event) {
 
     // Rufe eine Funktion auf, um das Feld zu markieren oder andere Aktionen durchzuführen
     console.log("CLICK" + isFixedCell(row, column));
-	
+
     if (!isFixedCell(row, column)) {
-		if (!checkIfValidPos(row, column)) {
+        if (!findEmptyCell()) {
+            showPopup();
+        }
+        if (!checkIfValidPos(row, column)) {
             sudokuData[row * maxLength + column] = " ";
+        } else if (checkIfValidPos(row, column)) {
+            return;
         }
         resetColors();
         markBox(row, column, "#e2ebf3");
@@ -368,7 +525,7 @@ for (var i = 0; i < numberButtons.length; i++) {
             // Schreibe die ausgewählte Zahl in das markierte Feld
             writeNumber(markedField.row, markedField.column, value);
             markedField = null;
-            //clearMarkedFields();
+            markedField = null;
         }
     });
 }
@@ -378,11 +535,13 @@ function writeNumber(row, column, value) {
     var x = column * cellSize + cellSize / 2;
     var y = row * cellSize + cellSize / 2;
     ctx.font = "50px Arial";
-    if (sudokuDataRaw[value] !== value.toString()) {
-    ctx.fillStyle = "#0b79e4"; // Blaue Farbe für Zahlen, die nicht in sudokuDataRaw sind
-  } else {
-    ctx.fillStyle = lineColor; // Standardfarbe für Zahlen in sudokuDataRaw
-  }
+    var index = row * maxLength + column;
+    var value2 = sudokuData[index];
+    if (sudokuDataRaw[value2] !== value.toString()) {
+        ctx.fillStyle = "#0b79e4"; // Blaue Farbe für Zahlen, die nicht in sudokuDataRaw sind
+    } else {
+        ctx.fillStyle = lineColor; // Standardfarbe für Zahlen in sudokuDataRaw
+    }
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(value, x, y);
@@ -401,68 +560,71 @@ function isFixedCell(row, column) {
 }
 
 function checkIfValidPos(row, column) {
-	ifValid=true;
-	var index = row * maxLength + column;
+    ifValid = true;
+    var index = row * maxLength + column;
     var value = sudokuData[index];
-  // Überprüfe die Zeile (row)
-  for (var c = 0; c < maxLength; c++) {
-    if (sudokuData[row * maxLength + c] === value && c !== column) {
-      ifValid=false; // Wert bereits in der Zeile vorhanden
+    // Überprüfe die Zeile (row)
+    for (var c = 0; c < maxLength; c++) {
+        if (sudokuData[row * maxLength + c] === value && c !== column) {
+            ifValid = false; // Wert bereits in der Zeile vorhanden
+        }
     }
-  }
 
-  // Überprüfe die Spalte (column)
-  for (var r = 0; r < maxLength; r++) {
-    if (sudokuData[r * maxLength + column] === value && r !== row) {
-      ifValid=false; // Wert bereits in der Spalte vorhanden
+    // Überprüfe die Spalte (column)
+    for (var r = 0; r < maxLength; r++) {
+        if (sudokuData[r * maxLength + column] === value && r !== row) {
+            ifValid = false; // Wert bereits in der Spalte vorhanden
+        }
     }
-  }
 
-  // Überprüfe den 3x3-Kasten
-  var boxRow = Math.floor(row / 3) * 3; // Erste Zeile des Kastens
-  var boxColumn = Math.floor(column / 3) * 3; // Erste Spalte des Kastens
+    // Überprüfe den 3x3-Kasten
+    var boxRow = Math.floor(row / 3) * 3; // Erste Zeile des Kastens
+    var boxColumn = Math.floor(column / 3) * 3; // Erste Spalte des Kastens
 
-  for (var r = boxRow; r < boxRow + 3; r++) {
-    for (var c = boxColumn; c < boxColumn + 3; c++) {
-      if (sudokuData[r * maxLength + c] === value && (r !== row || c !== column)) {
-        ifValid=false; // Wert bereits im Kasten vorhanden
-      }
+    for (var r = boxRow; r < boxRow + 3; r++) {
+        for (var c = boxColumn; c < boxColumn + 3; c++) {
+            if (sudokuData[r * maxLength + c] === value && (r !== row || c !== column)) {
+                ifValid = false; // Wert bereits im Kasten vorhanden
+            }
+        }
     }
-  }
-  return ifValid;
+    return ifValid;
 }
 
 // Eine Funktion, um alle Zahlen im Sudoku zu überprüfen und doppelte Zahlen rot zu markieren
 function checkIfValid() {
-	// Überprüfe jede Zelle im Sudoku
-  for (var row = 0; row < maxLength; row++) {
-    for (var column = 0; column < maxLength; column++) {
-      checkRowAndColumn(row, column);
+    ifValidPopUp = true;
+    // Überprüfe jede Zelle im Sudoku
+    for (var row = 0; row < maxLength; row++) {
+        for (var column = 0; column < maxLength; column++) {
+            checkRowAndColumn(row, column);
+        }
     }
-  }
-  
-  
-function checkRowAndColumn(row, column) {
-  var value = sudokuData[row * maxLength + column];
-  // Überprüfe die Zeile
-  for (var c = 0; c < maxLength; c++) {
-    if (c !== column && sudokuData[row * maxLength + c] === value) {
-		if (value !== " ") {
-                markField(row, c, "#f7cfd6");
-		}
+
+
+    function checkRowAndColumn(row, column) {
+        var value = sudokuData[row * maxLength + column];
+        // Überprüfe die Zeile
+        for (var c = 0; c < maxLength; c++) {
+            if (c !== column && sudokuData[row * maxLength + c] === value) {
+                if (value !== " ") {
+                    markField(row, c, "#f7cfd6");
+                    ifValidPopUp = false;
+                }
+            }
+        }
+        // Überprüfe die Spalte
+        for (var r = 0; r < maxLength; r++) {
+
+            if (r !== row && sudokuData[r * maxLength + column] === value) {
+                if (value !== " ") {
+                    markField(r, column, "#f7cfd6");
+                    ifValidPopUp = false;
+                }
+            }
+        }
     }
-  }
-  // Überprüfe die Spalte
-  for (var r = 0; r < maxLength; r++) {
-	  
-    if (r !== row && sudokuData[r * maxLength + column] === value) {
-		if (value !== " ") {
-                markField(r, column, "#f7cfd6");
-		}
-    }
-  }
-}
-  // Überprüfe die kleinen 3x3-Kästen
+    // Überprüfe die kleinen 3x3-Kästen
     for (var boxRow = 0; boxRow < maxLength; boxRow += 3) {
         for (var boxColumn = 0; boxColumn < maxLength; boxColumn += 3) {
             var numbersInBox = new Set();
@@ -481,108 +643,155 @@ function checkRowAndColumn(row, column) {
         }
     }
 
-	// Eine Hilfsfunktion, um alle Felder im gleichen 3x3-Kasten mit einer bestimmten Zahl zu markieren
+    // Eine Hilfsfunktion, um alle Felder im gleichen 3x3-Kasten mit einer bestimmten Zahl zu markieren
     function markFieldsInBox(boxRow, boxColumn, number, color) {
         for (var i = boxRow; i < boxRow + 3; i++) {
             for (var j = boxColumn; j < boxColumn + 3; j++) {
                 if (sudokuData[i * maxLength + j] === number) {
+                    ifValidPopUp = false;
                     markField(i, j, color);
                     resetLines();
                 }
             }
         }
     }
-
-	resetLines();
+    if (ifValidPopUp) {
+        document.getElementById("popup-message").innerHTML = "Das Sudoku ist gültig!";
+    } else {
+        document.getElementById("popup-message").innerHTML = "Das Sudoku ist ungültig!";
+    }
+    showPopup();
+    resetLines();
 }
 
 
 
 function solveSudoku() {
-  // Finde die nächste leere Zelle im Sudoku
-  var emptyCell = findEmptyCell();
+    // Finde die nächste leere Zelle im Sudoku
+    var emptyCell = findEmptyCell();
 
-  // Wenn keine leere Zelle gefunden wurde, ist das Sudoku gelöst
-  if (!emptyCell) {
-    alert("Das Sudoku wurde gelöst!");
-    return;
-  }
-
-  var row = emptyCell.row;
-  var column = emptyCell.column;
-
-  // Probiere Zahlen von 1 bis maxLength aus, um die leere Zelle zu füllen
-  for (var number = 1; number <= maxLength; number++) {
-    // Überprüfe, ob die aktuelle Zahl in der aktuellen Zelle gültig ist
-    if (isValidNumber(row, column, number)) {
-      // Setze die Zahl in die aktuelle Zelle
-      sudokuData[row * maxLength + column] = number.toString();
-
-      // Löse das Sudoku rekursiv, indem du zur nächsten leeren Zelle gehst
-      solveSudoku();
-
-      // Wenn das Sudoku gelöst wurde, beende die Schleife und die Funktion
-      if (isSudokuSolved()) {
+    // Wenn keine leere Zelle gefunden wurde, ist das Sudoku gelöst
+    if (!emptyCell) {
+        showPopup();
         return;
-      }
-
-      // Wenn das Sudoku nicht gelöst wurde, setze die Zelle zurück und probiere die nächste Zahl
-      sudokuData[row * maxLength + column] = " ";
     }
-  }
+
+    var row = emptyCell.row;
+    var column = emptyCell.column;
+
+    // Probiere Zahlen von 1 bis maxLength aus, um die leere Zelle zu füllen
+    for (var number = 1; number <= maxLength; number++) {
+        // Überprüfe, ob die aktuelle Zahl in der aktuellen Zelle gültig ist
+        if (isValidNumber(row, column, number)) {
+            // Setze die Zahl in die aktuelle Zelle
+            sudokuData[row * maxLength + column] = number.toString();
+
+            // Löse das Sudoku rekursiv, indem du zur nächsten leeren Zelle gehst
+            solveSudoku();
+
+            // Wenn das Sudoku gelöst wurde, beende die Schleife und die Funktion
+            if (isSudokuSolved()) {
+                document.getElementById("popup-message").innerHTML = "Das Sudoku wurde gelöst!";
+                showPopup();
+                return;
+            }
+
+            // Wenn das Sudoku nicht gelöst wurde, setze die Zelle zurück und probiere die nächste Zahl
+            sudokuData[row * maxLength + column] = " ";
+        }
+    }
 }
 
 // Eine Funktion, um die nächste leere Zelle im Sudoku zu finden
 function findEmptyCell() {
-  for (var row = 0; row < maxLength; row++) {
-    for (var column = 0; column < maxLength; column++) {
-      if (sudokuData[row * maxLength + column] === " ") {
-        return { row: row, column: column };
-      }
+    for (var row = 0; row < maxLength; row++) {
+        for (var column = 0; column < maxLength; column++) {
+            if (sudokuData[row * maxLength + column] === " ") {
+                return {
+                    row: row,
+                    column: column
+                };
+            }
+        }
     }
-  }
-  return null;
+    return false;
 }
 
 // Eine Funktion, um zu überprüfen, ob eine Zahl in einer bestimmten Zelle gültig ist
 function isValidNumber(row, column, number) {
-  // Überprüfe die Zeile und Spalte
-  for (var i = 0; i < maxLength; i++) {
-    if (
-      sudokuData[row * maxLength + i] === number.toString() ||
-      sudokuData[i * maxLength + column] === number.toString()
-    ) {
-      return false;
+    // Überprüfe die Zeile und Spalte
+    for (var i = 0; i < maxLength; i++) {
+        if (
+            sudokuData[row * maxLength + i] === number.toString() ||
+            sudokuData[i * maxLength + column] === number.toString()
+        ) {
+            return false;
+        }
     }
-  }
 
-  // Überprüfe das 3x3-Unterquadrat
-  var boxRow = Math.floor(row / 3) * 3;
-  var boxColumn = Math.floor(column / 3) * 3;
-  for (var i = boxRow; i < boxRow + 3; i++) {
-    for (var j = boxColumn; j < boxColumn + 3; j++) {
-      if (sudokuData[i * maxLength + j] === number.toString()) {
-        return false;
-      }
+    // Überprüfe das 3x3-Unterquadrat
+    var boxRow = Math.floor(row / 3) * 3;
+    var boxColumn = Math.floor(column / 3) * 3;
+    for (var i = boxRow; i < boxRow + 3; i++) {
+        for (var j = boxColumn; j < boxColumn + 3; j++) {
+            if (sudokuData[i * maxLength + j] === number.toString()) {
+                return false;
+            }
+        }
     }
-  }
 
-  return true;
+    return true;
 }
 
 // Eine Funktion, um zu überprüfen, ob das Sudoku gelöst wurde
 function isSudokuSolved() {
-  for (var i = 0; i < maxLength; i++) {
-    for (var j = 0; j < maxLength; j++) {
-      if (sudokuData[i * maxLength + j] === " ") {
-        return false;
-      }
+    for (var i = 0; i < maxLength; i++) {
+        for (var j = 0; j < maxLength; j++) {
+            if (sudokuData[i * maxLength + j] === " ") {
+                return false;
+            }
+        }
     }
-  }
-  resetColors();
-  resetLines();
-  return true;
+    resetColors();
+    resetLines();
+    return true;
 }
+
+function showLoginPopup() {
+    const loginPopup = document.getElementById("loginPopup");
+    loginPopup.style.display = "flex";
+}
+
+window.addEventListener("click", function(event) {
+    const loginPopup = document.getElementById("loginPopup");
+    if (event.target == loginPopup) {
+        loginPopup.style.display = "none";
+    }
+});
+
+// Funktion zum Anzeigen des Popups
+function showPopup() {
+    const popupContainer = document.getElementById("popupContainer");
+    popupContainer.style.display = "flex";
+}
+
+// Funktion zum Schließen des Popups
+function closePopup() {
+    const popupContainer = document.getElementById("popupContainer");
+    popupContainer.style.display = "none";
+}
+
+// Schließen Sie das Popup, wenn auf den Schließen-Button geklickt wird
+const closeButton = document.getElementById("popup-close");
+closeButton.addEventListener("click", closePopup);
+
+// Schließen Sie das Popup, wenn irgendwo hingeklickt wird
+window.addEventListener("click", function(event) {
+    const popupContainer = document.getElementById("popupContainer");
+    if (event.target == popupContainer) {
+        closePopup();
+    }
+});
 
 // TODO:
 //- Login
