@@ -1,16 +1,34 @@
 <html>
   <head>
     <style>
+      :root {
+        --background-color: #f0f0f0;
+        --header-background-color: #333;
+        --header-text-color: white;
+        --footer-background-color: #333;
+        --footer-text-color: white;
+        --control-panel-button-background-color: #d1d1d1;
+        --control-panel-button-text-color: #333;
+        --control-panel-button-hover-background-color: #ccc;
+        --number-background-color: #d1d1d1;
+        --number-hover-background-color: #c9c9c9;
+        --popup-input-border-color: #ccc;
+        --popup-content-color: #eaeaea;
+        --popup-background-color: rgba(0, 0, 0, 0.5);
+        --popup-button-background-color: #4caf50;
+        --popup-button-hover-background-color: #45a049;
+      }
+
       body {
         font-family: Arial, sans-serif;
-        background-color: #f0f0f0;
+        background-color: var(--background-color);
         margin: 0;
         padding: 0;
       }
 
       header {
-        background-color: #333;
-        color: white;
+        background-color: var(--header-background-color);
+        color: var(--header-text-color);
         height: 80px;
         display: flex;
         align-items: center;
@@ -32,13 +50,13 @@
       }
 
       header a {
-        color: white;
+        color: var(--header-text-color);
         text-decoration: none;
       }
 
       footer {
-        background-color: #333;
-        color: white;
+        background-color: var(--footer-background-color);
+        color: var(--footer-text-color);
         height: 60px;
         display: flex;
         align-items: center;
@@ -58,6 +76,20 @@
         border: 1px solid black;
       }
 
+      @media (max-width: 1400px) {
+        canvas {
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      @media (max-width: 1020px) {
+        canvas {
+          width: 500px;
+          height: 500px;
+        }
+      }
+
       .control-panel {
         display: flex;
         align-items: center;
@@ -69,12 +101,12 @@
       }
 
       .control-panel button {
-		user-select: none;
+        user-select: none;
         padding: 10px 20px;
         border: none;
         border-radius: 40px;
-        background-color: #eaeaea;
-        color: #333;
+        background-color: var(--control-panel-button-background-color);
+        color: var(--control-panel-button-text-color);
         font-size: 14px;
         font-weight: bold;
         cursor: pointer;
@@ -84,7 +116,7 @@
       }
 
       .control-panel button:hover {
-        background-color: #ccc;
+        background-color: var(--control-panel-button-hover-background-color);
       }
 
       .number-selector {
@@ -96,10 +128,10 @@
       }
 
       .number {
-		user-select: none;
-        width: 7rem;
-        height: 7rem;
-        background-color: #eaeaea;
+        user-select: none;
+        width: 8rem;
+        height: 8rem;
+        background-color: var(--number-background-color);
         border-radius: 40px;
         display: flex;
         align-items: center;
@@ -107,19 +139,19 @@
         cursor: pointer;
         font-family: Arial, sans-serif;
         font-size: 35px;
-        /* flex-basis: 31%; */
         margin: 1%;
       }
 
       .number:hover {
-        background-color: #c9c9c9;
+        transition: background-color 0.3s ease;
+        background-color: var(--number-hover-background-color) !important;
       }
 
       .login-container {
         width: 300px;
         padding: 20px;
         border-radius: 5px;
-        background-color: #eaeaea;
+        background-color: var(--popup-content-color);
         text-align: center;
       }
 
@@ -142,7 +174,7 @@
       .login-container input[type="password"] {
         width: 100%;
         padding: 8px;
-        border: 1px solid #ccc;
+        border: 1px solid var(--popup-input-border-color);
         border-radius: 4px;
       }
 
@@ -151,14 +183,14 @@
         padding: 10px;
         border: none;
         border-radius: 4px;
-        background-color: #4caf50;
+        background-color: var(--popup-button-background-color);
         color: white;
         font-weight: bold;
         cursor: pointer;
       }
 
       .login-container input[type="submit"]:hover {
-        background-color: #45a049;
+        background-color: var(--popup-button-hover-background-color);
       }
 
       #overlay {
@@ -167,7 +199,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: var(--popup-background-color);
         z-index: 9999;
         display: none;
       }
@@ -181,16 +213,16 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: var(--popup-background-color);
         z-index: 999;
-		user-select: none;
+        user-select: none;
       }
 
       .popup-content {
         width: 300px;
         padding: 20px;
         border-radius: 5px;
-        background-color: #eaeaea;
+        background-color: var(--popup-content-color);
         text-align: center;
       }
 
@@ -203,24 +235,24 @@
         padding: 10px;
         border: none;
         border-radius: 4px;
-        background-color: #4caf50;
+        background-color: var(--popup-button-background-color);
         color: white;
         font-weight: bold;
         cursor: pointer;
       }
 
       .popup-content button:hover {
-        background-color: #45a049;
+        background-color: var(--popup-button-hover-background-color);
       }
-	  
-	  .timer {
+
+      .timer {
         font-size: 24px;
         margin-bottom: 10px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-direction: column;
-		user-select: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        user-select: none;
       }
     </style>
     <title>Sudoku</title>
@@ -240,7 +272,7 @@
         <canvas id="sudoku-canvas" width="900px" height="900px"></canvas>
       </div>
       <div>
-	    <div class="timer" id="timer">Time: 0:00</div>
+        <div class="timer" id="timer">Time: 0:00</div>
         <div class="control-panel">
           <button onClick="window.location.reload()">Neues Spiel</button>
           <button onclick="solveSudoku()">Lösung zeigen</button>
@@ -301,10 +333,12 @@ const cellSize = 100;
 const sudokuFont = "50px Arial";
 const filename = "sudoku.txt";
 const newNumbersColor = "#0b79e4";
+const matchingNumbersColor = "#c3d7ea";
 const rowColumnBoxColor = "#e2ebf3";
 const markedFieldColor = "#bbdefb";
 const invalidColor = "#f7cfd6";
-const lightGrayColor = "#eaeaea";
+const disabledButtonColor = "#b2b2b2";
+const lightGrayColor = "#d1d1d1";
 const bgColor = "#ffffff";
 const lineColor = "#000000";
 
@@ -313,7 +347,10 @@ var ctx = canvas.getContext("2d");
 var sudokuData = [];
 var sudokuDataRaw = [];
 var sudokuDataSplit = [];
-var randomIndex = 0;
+var markedField = {
+    row: 0,
+    column: 0
+};
 var request = new XMLHttpRequest();
 
 ctx.fillStyle = bgColor;
@@ -329,7 +366,7 @@ request.onload = function() {
         // Konvertiere die Daten in ein Array von Zahlen und Leerzeichen
         var sudokuText = request.responseText;
         var chunkSize = 164;
-        var numChunks = Math.ceil(sudokuText.length/chunkSize);
+        var numChunks = Math.ceil(sudokuText.length / chunkSize);
 
         for (var i = 0; i < numChunks; i++) {
             var start = i * chunkSize;
@@ -344,8 +381,8 @@ request.onload = function() {
         drawNumbers();
         console.log(randomIndex);
         var sudokuId = randomIndex + 1; // Index beginnt bei 0, deshalb +1
-        
-        sudokuIdElement.textContent = "Sudoku ID: " + sudokuId;
+
+        sudokuIdElement.innerText = "Sudoku ID: " + sudokuId;
     }
 };
 request.send();
@@ -383,7 +420,7 @@ function resetLines() {
             ctx.lineWidth = 1; // Setze die Linienbreite auf den Standardwert 1
         }
     }
-	updateButtonColors();
+    updateButtonColors();
 }
 
 // Eine Funktion, um die Zahlen auf dem Sudoku Raster zu zeichnen
@@ -433,17 +470,13 @@ function markField(row, column, color) {
         row: row,
         column: column
     };
-	markedField2 = {
-        row: row,
-        column: column
-    };
+
+    markedField2 = JSON.parse(JSON.stringify(markedField));
     // Setze die Hintergrundfarbe des markierten Feldes
     ctx.fillStyle = color;
     ctx.fillRect(x, y, cellSize, cellSize);
 
     // Zeichne die Linien um das markierte Feld herum, um den Rahmen beizubehalten
-    ctx.strokeStyle = lineColor;
-    ctx.lineWidth = 1;
     ctx.strokeRect(x, y, cellSize, cellSize);
 
     var index = row * maxLength + column;
@@ -474,32 +507,32 @@ function markRowAndColumn(row, column, color) {
 }
 
 function updateButtonColors() {
-        const numberCounts = {};
-        for (let i = 0; i < maxLength; i++) {
-          for (let j = 0; j < maxLength; j++) {
+    const numberCounts = {};
+    for (let i = 0; i < maxLength; i++) {
+        for (let j = 0; j < maxLength; j++) {
             const index = i * maxLength + j;
             const value = sudokuData[index];
             if (value !== " ") {
-              if (!numberCounts[value]) {
-                numberCounts[value] = 1;
-              } else {
-                numberCounts[value]++;
-              }
+                if (!numberCounts[value]) {
+                    numberCounts[value] = 1;
+                } else {
+                    numberCounts[value]++;
+                }
             }
-          }
         }
+    }
 
-        for (let i = 0; i < numberButtons.length; i++) {
-          const button = numberButtons[i];
-          const value = button.getAttribute("data-value");
-          if (numberCounts[value] && numberCounts[value] >= 9) {
-            button.style.backgroundColor = "red";
+    for (let i = 0; i < numberButtons.length; i++) {
+        const button = numberButtons[i];
+        const value = button.getAttribute("data-value");
+        if (numberCounts[value] && numberCounts[value] >= 9) {
+            button.style.backgroundColor = disabledButtonColor;
             button.style.pointerEvents = "none";
-          } else {
+        } else {
             button.style.backgroundColor = lightGrayColor;
             button.style.pointerEvents = "auto";
-          }
         }
+    }
 }
 
 canvas.addEventListener("click", function(event) {
@@ -514,37 +547,66 @@ canvas.addEventListener("click", function(event) {
 
     // Rufe eine Funktion auf, um das Feld zu markieren oder andere Aktionen durchzuführen
     console.log("CLICK" + isFixedCell(row, column));
-
+    if (isSudokuSolved()) {
+        showPopup();
+        return;
+    }
+    resetColors();
     if (!isFixedCell(row, column)) {
-        if (!findEmptyCell()) {
-            showPopup();
-        }
-        resetColors();
+
         markBox(row, column, rowColumnBoxColor);
         markRowAndColumn(row, column, rowColumnBoxColor);
         markField(row, column, markedFieldColor);
-        resetLines();
+        if (isSudokuSolved()) {
+            showPopup();
+            return;
+        }
     }
+    markMatchingNumbers(row, column, matchingNumbersColor);
+    resetLines();
 });
+
+function markMatchingNumbers(row, column, color) {
+    var index = row * maxLength + column;
+    var value = sudokuData[index];
+    if (value !== " ") { // Updated condition
+        for (var r = 0; r < maxLength; r++) {
+            for (var c = 0; c < maxLength; c++) {
+                if (sudokuData[r * maxLength + c] === value) {
+                    markField(r, c, color);
+                }
+            }
+        }
+    }
+}
 
 // Wähle eine Zahl beim Klicken
 for (var i = 0; i < numberButtons.length; i++) {
     var numberButton = numberButtons[i];
-    numberButton.addEventListener("click", function() {
-        if (markedField2 && !isFixedCell(markedField2.row, markedField2.column)) {
+    numberButton.addEventListener("click", function() { // Markiere die passenden Zahlen
+
+        row = markedField2.row;
+        column = markedField2.column;
+        console.log(row, column);
+        console.log(markedField2, markedField);
+        if (markedField2 && !isFixedCell(row, column)) {
             var value = this.dataset.value;
-			if (!checkIfValidPos(markedField2.row, markedField2.column)) {
-                sudokuData[markedField2.row * maxLength + markedField2.column] = " ";
-            }
+
+            sudokuData[row * maxLength + column] = " ";
+            resetColors();
+            markBox(row, column, rowColumnBoxColor);
+            markRowAndColumn(row, column, rowColumnBoxColor);
+
+
             // Schreibe die ausgewählte Zahl in das markierte Feld
-            writeNumber(markedField2.row, markedField2.column, value);
+            writeNumber(row, column, value);
             resetLines();
-			markedField = null;
+
         }
     });
 }
 
-// Eine Funktion, um ein Feld im Sudoku zu beschreiben (Zahl eintragen)
+// Feld im Sudoku zu beschreiben (Zahl eintragen)
 function writeNumber(row, column, value) {
     var x = column * cellSize + cellSize / 2;
     var y = row * cellSize + cellSize / 2;
@@ -560,7 +622,8 @@ function writeNumber(row, column, value) {
     ctx.textBaseline = "middle";
     ctx.fillText(value, x, y);
     sudokuData[row * maxLength + column] = value.toString();
-	markField(row, column, markedFieldColor);
+    markMatchingNumbers(row, column, matchingNumbersColor);
+    markField(row, column, markedFieldColor);
 }
 
 
@@ -604,6 +667,8 @@ function checkIfValidPos(row, column) {
 
 // Eine Funktion, um alle Zahlen im Sudoku zu überprüfen und doppelte Zahlen rot zu markieren
 function checkIfValid() {
+    tempRow = markedField.row;
+    tempColumn = markedField.column;
     ifValidPopUp = true;
     // Überprüfe jede Zelle im Sudoku
     for (var row = 0; row < maxLength; row++) {
@@ -659,7 +724,7 @@ function checkIfValid() {
             for (var j = boxColumn; j < boxColumn + 3; j++) {
                 if (sudokuData[i * maxLength + j] === number) {
                     markField(i, j, color);
-					ifValidPopUp = false;
+                    ifValidPopUp = false;
                 }
             }
         }
@@ -671,17 +736,21 @@ function checkIfValid() {
         popUpMessage.innerHTML = "Das Sudoku ist ungültig!";
     }
     showPopup();
+    markedField.row = tempRow;
+    markedField.column = tempColumn;
     resetLines();
 }
 
 function solveSudoku() {
+    tempRow = markedField.row;
+    tempColumn = markedField.column;
     // Finde die nächste leere Zelle im Sudoku
     var emptyCell = findEmptyCell();
 
     // Wenn keine leere Zelle gefunden wurde, ist das Sudoku gelöst
     if (!emptyCell) {
         showPopup();
-		stopTimer();
+        stopTimer();
         return;
     }
 
@@ -702,7 +771,7 @@ function solveSudoku() {
             if (isSudokuSolved()) {
                 popUpMessage.innerHTML = "Das Sudoku wurde gelöst!";
                 showPopup();
-				stopTimer()
+                stopTimer()
                 return;
             }
 
@@ -710,6 +779,8 @@ function solveSudoku() {
             sudokuData[row * maxLength + column] = " ";
         }
     }
+    markedField.row = tempRow;
+    markedField.column = tempColumn;
 }
 
 // Eine Funktion, um die nächste leere Zelle im Sudoku zu finden
@@ -823,5 +894,4 @@ window.addEventListener("load", startTimer);
 //- Stats
 //- Sudoku Creator
 //- Notizfunktion
-//- field nur disabled, wenn prüfen
 </script>
