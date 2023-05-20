@@ -289,6 +289,8 @@
           <div class="number" data-value="7">7</div>
           <div class="number" data-value="8">8</div>
           <div class="number" data-value="9">9</div>
+		  <div></div>
+		  <div class="number" style="" data-value=" ">Clear</div>
         </div>
       </div>
       <div class="popup-container" id="loginPopup" style="display: none;">
@@ -347,6 +349,10 @@ var ctx = canvas.getContext("2d");
 var sudokuData = [];
 var sudokuDataRaw = [];
 var sudokuDataSplit = [];
+var markedField2 = {
+    row: 0,
+    column: 0
+};
 var markedField = {
     row: 0,
     column: 0
@@ -556,13 +562,15 @@ canvas.addEventListener("click", function(event) {
 
         markBox(row, column, rowColumnBoxColor);
         markRowAndColumn(row, column, rowColumnBoxColor);
+		markMatchingNumbers(row, column, matchingNumbersColor);
         markField(row, column, markedFieldColor);
         if (isSudokuSolved()) {
             showPopup();
             return;
         }
-    }
-    markMatchingNumbers(row, column, matchingNumbersColor);
+    } else if (isFixedCell(row, column)) {markMatchingNumbers(row, column, matchingNumbersColor);}
+	
+    
     resetLines();
 });
 
@@ -591,7 +599,6 @@ for (var i = 0; i < numberButtons.length; i++) {
         console.log(markedField2, markedField);
         if (markedField2 && !isFixedCell(row, column)) {
             var value = this.dataset.value;
-
             sudokuData[row * maxLength + column] = " ";
             resetColors();
             markBox(row, column, rowColumnBoxColor);
@@ -667,8 +674,7 @@ function checkIfValidPos(row, column) {
 
 // Eine Funktion, um alle Zahlen im Sudoku zu überprüfen und doppelte Zahlen rot zu markieren
 function checkIfValid() {
-    tempRow = markedField.row;
-    tempColumn = markedField.column;
+    const { row: tempRow, column: tempColumn } = markedField;
     ifValidPopUp = true;
     // Überprüfe jede Zelle im Sudoku
     for (var row = 0; row < maxLength; row++) {
@@ -736,14 +742,12 @@ function checkIfValid() {
         popUpMessage.innerHTML = "Das Sudoku ist ungültig!";
     }
     showPopup();
-    markedField.row = tempRow;
-    markedField.column = tempColumn;
+    markedField = { ...markedField, row: tempRow, column: tempColumn };
     resetLines();
 }
 
 function solveSudoku() {
-    tempRow = markedField.row;
-    tempColumn = markedField.column;
+    const { row: tempRow, column: tempColumn } = markedField;
     // Finde die nächste leere Zelle im Sudoku
     var emptyCell = findEmptyCell();
 
@@ -779,8 +783,7 @@ function solveSudoku() {
             sudokuData[row * maxLength + column] = " ";
         }
     }
-    markedField.row = tempRow;
-    markedField.column = tempColumn;
+    markedField = { ...markedField, row: tempRow, column: tempColumn };
 }
 
 // Eine Funktion, um die nächste leere Zelle im Sudoku zu finden
@@ -894,4 +897,5 @@ window.addEventListener("load", startTimer);
 //- Stats
 //- Sudoku Creator
 //- Notizfunktion
+//- Pause Funktion
 </script>
