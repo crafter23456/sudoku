@@ -69,6 +69,7 @@
       }
 
       .control-panel button {
+		user-select: none;
         padding: 10px 20px;
         border: none;
         border-radius: 40px;
@@ -95,6 +96,7 @@
       }
 
       .number {
+		user-select: none;
         width: 7rem;
         height: 7rem;
         background-color: #eaeaea;
@@ -111,19 +113,6 @@
 
       .number:hover {
         background-color: #c9c9c9;
-      }
-
-      .popup-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 999;
       }
 
       .login-container {
@@ -194,6 +183,7 @@
         justify-content: center;
         background-color: rgba(0, 0, 0, 0.5);
         z-index: 999;
+		user-select: none;
       }
 
       .popup-content {
@@ -222,6 +212,16 @@
       .popup-content button:hover {
         background-color: #45a049;
       }
+	  
+	  .timer {
+        font-size: 24px;
+        margin-bottom: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+		user-select: none;
+      }
     </style>
     <title>Sudoku</title>
   </head>
@@ -240,10 +240,12 @@
         <canvas id="sudoku-canvas" width="900px" height="900px"></canvas>
       </div>
       <div>
+	    <div class="timer" id="timer">Time: 0:00</div>
         <div class="control-panel">
           <button onClick="window.location.reload()">Neues Spiel</button>
           <button onclick="solveSudoku()">Lösung zeigen</button>
           <button onclick="checkIfValid()">Prüfen</button>
+          <button onclick="stopTimer()">Stop</button>
         </div>
         <div class="number-selector">
           <div class="number" data-value="1">1</div>
@@ -272,7 +274,7 @@
       <div id="overlay"></div>
       <div class="popup-container" id="popupContainer" style="display: none;">
         <div class="popup-content">
-          <p id="popup-message">Das Sudoku wurde gelöst!</p>
+          <p id="popup-message"></p>
           <button id="popup-close">Schließen</button>
         </div>
       </div>
@@ -281,8 +283,10 @@
   </body>
 </html>
 
-
 <script>
+let startTime;
+let timerInterval;
+
 // Konstanten
 const canvas = document.getElementById("sudoku-canvas");
 const sudokuIdElement = document.getElementById("sudokuIdElement");
@@ -291,6 +295,7 @@ const popUpMessage = document.getElementById("popup-message");
 const closeButton = document.getElementById("popup-close");
 const popupContainer = document.getElementById("popupContainer");
 const numberButtons = document.getElementsByClassName("number");
+const timerElement = document.getElementById("timer");
 const maxLength = 9;
 const cellSize = 100;
 const sudokuFont = "50px Arial";
@@ -298,6 +303,8 @@ const filename = "sudoku.txt";
 const newNumbersColor = "#0b79e4";
 const rowColumnBoxColor = "#e2ebf3";
 const markedFieldColor = "#bbdefb";
+const invalidColor = "#f7cfd6";
+const lightGrayColor = "#eaeaea";
 const bgColor = "#ffffff";
 const lineColor = "#000000";
 
@@ -376,6 +383,7 @@ function resetLines() {
             ctx.lineWidth = 1; // Setze die Linienbreite auf den Standardwert 1
         }
     }
+	updateButtonColors();
 }
 
 // Eine Funktion, um die Zahlen auf dem Sudoku Raster zu zeichnen
@@ -425,6 +433,10 @@ function markField(row, column, color) {
         row: row,
         column: column
     };
+	markedField2 = {
+        row: row,
+        column: column
+    };
     // Setze die Hintergrundfarbe des markierten Feldes
     ctx.fillStyle = color;
     ctx.fillRect(x, y, cellSize, cellSize);
@@ -461,6 +473,35 @@ function markRowAndColumn(row, column, color) {
     }
 }
 
+function updateButtonColors() {
+        const numberCounts = {};
+        for (let i = 0; i < maxLength; i++) {
+          for (let j = 0; j < maxLength; j++) {
+            const index = i * maxLength + j;
+            const value = sudokuData[index];
+            if (value !== " ") {
+              if (!numberCounts[value]) {
+                numberCounts[value] = 1;
+              } else {
+                numberCounts[value]++;
+              }
+            }
+          }
+        }
+
+        for (let i = 0; i < numberButtons.length; i++) {
+          const button = numberButtons[i];
+          const value = button.getAttribute("data-value");
+          if (numberCounts[value] && numberCounts[value] >= 9) {
+            button.style.backgroundColor = "red";
+            button.style.pointerEvents = "none";
+          } else {
+            button.style.backgroundColor = lightGrayColor;
+            button.style.pointerEvents = "auto";
+          }
+        }
+}
+
 canvas.addEventListener("click", function(event) {
     // Berechne die Position des Klicks relativ zum Canvas
     var rect = canvas.getBoundingClientRect();
@@ -478,11 +519,6 @@ canvas.addEventListener("click", function(event) {
         if (!findEmptyCell()) {
             showPopup();
         }
-        if (!checkIfValidPos(row, column)) {
-            sudokuData[row * maxLength + column] = " ";
-        } else if (checkIfValidPos(row, column)) {
-            return;
-        }
         resetColors();
         markBox(row, column, rowColumnBoxColor);
         markRowAndColumn(row, column, rowColumnBoxColor);
@@ -495,11 +531,15 @@ canvas.addEventListener("click", function(event) {
 for (var i = 0; i < numberButtons.length; i++) {
     var numberButton = numberButtons[i];
     numberButton.addEventListener("click", function() {
-        if (markedField) {
+        if (markedField2 && !isFixedCell(markedField2.row, markedField2.column)) {
             var value = this.dataset.value;
+			if (!checkIfValidPos(markedField2.row, markedField2.column)) {
+                sudokuData[markedField2.row * maxLength + markedField2.column] = " ";
+            }
             // Schreibe die ausgewählte Zahl in das markierte Feld
-            writeNumber(markedField.row, markedField.column, value);
-            markedField = null;
+            writeNumber(markedField2.row, markedField2.column, value);
+            resetLines();
+			markedField = null;
         }
     });
 }
@@ -520,6 +560,7 @@ function writeNumber(row, column, value) {
     ctx.textBaseline = "middle";
     ctx.fillText(value, x, y);
     sudokuData[row * maxLength + column] = value.toString();
+	markField(row, column, markedFieldColor);
 }
 
 
@@ -617,9 +658,8 @@ function checkIfValid() {
         for (var i = boxRow; i < boxRow + 3; i++) {
             for (var j = boxColumn; j < boxColumn + 3; j++) {
                 if (sudokuData[i * maxLength + j] === number) {
-                    ifValidPopUp = false;
                     markField(i, j, color);
-                    resetLines();
+					ifValidPopUp = false;
                 }
             }
         }
@@ -641,6 +681,7 @@ function solveSudoku() {
     // Wenn keine leere Zelle gefunden wurde, ist das Sudoku gelöst
     if (!emptyCell) {
         showPopup();
+		stopTimer();
         return;
     }
 
@@ -661,6 +702,7 @@ function solveSudoku() {
             if (isSudokuSolved()) {
                 popUpMessage.innerHTML = "Das Sudoku wurde gelöst!";
                 showPopup();
+				stopTimer()
                 return;
             }
 
@@ -754,9 +796,32 @@ window.addEventListener("click", function(event) {
     }
 });
 
+// Timer function
+function startTimer() {
+    startTime = Date.now();
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+// Update timer display
+function updateTimer() {
+    var elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+    var minutes = Math.floor(elapsedTime / 60);
+    var seconds = elapsedTime % 60;
+    timerElement.textContent = `Time: ${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+// Stop timer function
+function stopTimer() {
+    clearInterval(timerInterval);
+}
+
+// Add event listener to start timer when the page loads
+window.addEventListener("load", startTimer);
+
 // TODO:
 //- Login
 //- Stats
-//-Sudoku Creator
-//- Wenn eine Zahl überall vorhanden ist = button disablen
+//- Sudoku Creator
+//- Notizfunktion
+//- field nur disabled, wenn prüfen
 </script>
