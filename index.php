@@ -2,6 +2,7 @@
   <head>
     <style>
       :root {
+        --font: Montserrat, sans-serif;
         --background-color: #f0f0f0;
         --header-background-color: #333;
         --header-text-color: white;
@@ -20,7 +21,7 @@
       }
 
       body {
-        font-family: Arial, sans-serif;
+        font-family: var(--font);
         background-color: var(--background-color);
         margin: 0;
         padding: 0;
@@ -65,8 +66,8 @@
 
       main {
         display: flex;
-        grid-gap: 20px;
         padding: 20px;
+		grid-gap: 20px;
         flex-direction: row;
         justify-content: center;
         align-items: center;
@@ -83,10 +84,16 @@
         }
       }
 
-      @media (max-width: 1020px) {
+      @media (max-width: 1000px) {
         canvas {
-          width: 500px;
-          height: 500px;
+          width: 750px;
+          height: 750px;
+        }
+        main {
+          flex-direction: column;
+        }
+        #panel {
+          width: 30rem;
         }
       }
 
@@ -108,6 +115,7 @@
         background-color: var(--control-panel-button-background-color);
         color: var(--control-panel-button-text-color);
         font-size: 14px;
+        font-family: var(--font);
         font-weight: bold;
         cursor: pointer;
         transition: background-color 0.3s ease;
@@ -137,7 +145,6 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        font-family: Arial, sans-serif;
         font-size: 35px;
         margin: 1%;
       }
@@ -178,8 +185,7 @@
         border-radius: 4px;
       }
 
-      .login-container input[type="submit"] {
-        width: 100%;
+      .popup-content button, .login-container input[type='submit'] {
         padding: 10px;
         border: none;
         border-radius: 4px;
@@ -189,7 +195,7 @@
         cursor: pointer;
       }
 
-      .login-container input[type="submit"]:hover {
+      .popup-content button:hover, .login-container input[type="submit"]:hover {
         background-color: var(--popup-button-hover-background-color);
       }
 
@@ -231,20 +237,6 @@
         margin-bottom: 20px;
       }
 
-      .popup-content button {
-        padding: 10px;
-        border: none;
-        border-radius: 4px;
-        background-color: var(--popup-button-background-color);
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-      }
-
-      .popup-content button:hover {
-        background-color: var(--popup-button-hover-background-color);
-      }
-
       .timer {
         font-size: 24px;
         margin-bottom: 10px;
@@ -256,9 +248,13 @@
       }
     </style>
     <title>Sudoku</title>
+	<meta name="viewport" content="user-scalable=no">
   </head>
   <body>
     <header>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
       <h1>Sudoku</h1>
       <span id="sudokuIdElement"></span>
       <ul>
@@ -271,7 +267,7 @@
       <div>
         <canvas id="sudoku-canvas" width="900px" height="900px"></canvas>
       </div>
-      <div>
+      <div id="panel">
         <div class="timer" id="timer">Time: 0:00</div>
         <div class="control-panel">
           <button onClick="window.location.reload()">Neues Spiel</button>
@@ -290,7 +286,7 @@
           <div class="number" data-value="8">8</div>
           <div class="number" data-value="9">9</div>
 		  <div></div>
-		  <div class="number" style="" data-value=" ">Clear</div>
+		  <div class="number" id="clear" data-value=" ">Clear</div>
         </div>
       </div>
       <div class="popup-container" id="loginPopup" style="display: none;">
@@ -318,9 +314,6 @@
 </html>
 
 <script>
-let startTime;
-let timerInterval;
-
 // Konstanten
 const canvas = document.getElementById("sudoku-canvas");
 const sudokuIdElement = document.getElementById("sudokuIdElement");
@@ -329,9 +322,9 @@ const popUpMessage = document.getElementById("popup-message");
 const closeButton = document.getElementById("popup-close");
 const popupContainer = document.getElementById("popupContainer");
 const numberButtons = document.getElementsByClassName("number");
+const clearButton = document.getElementById("clear");
 const timerElement = document.getElementById("timer");
 const maxLength = 9;
-const cellSize = 100;
 const sudokuFont = "50px Arial";
 const filename = "sudoku.txt";
 const newNumbersColor = "#0b79e4";
@@ -345,18 +338,22 @@ const bgColor = "#ffffff";
 const lineColor = "#000000";
 
 // Variablen
+let startTime;
+let timerInterval;
 var ctx = canvas.getContext("2d");
+var getSolved = false;
+var canvasStyle = window.getComputedStyle(canvas);
+var canvasWidth = parseInt(canvasStyle.getPropertyValue("width"), 10);
+var calcCellSize = canvasWidth / maxLength;
+var cellSize = canvas.width / maxLength;
 var sudokuData = [];
 var sudokuDataRaw = [];
 var sudokuDataSplit = [];
-var markedField2 = {
-    row: 0,
-    column: 0
-};
 var markedField = {
     row: 0,
     column: 0
 };
+var markedField2 = JSON.parse(JSON.stringify(markedField));
 var request = new XMLHttpRequest();
 
 ctx.fillStyle = bgColor;
@@ -392,6 +389,14 @@ request.onload = function() {
     }
 };
 request.send();
+
+window.addEventListener('resize', handleResize);
+
+function handleResize(){
+    canvasStyle = window.getComputedStyle(canvas);
+    canvasWidth = parseInt(canvasStyle.getPropertyValue("width"), 10);
+    calcCellSize = canvasWidth / maxLength;
+}
 
 function resetColors() {
     for (var i = 0; i < maxLength; i++) {
@@ -476,8 +481,8 @@ function markField(row, column, color) {
         row: row,
         column: column
     };
-
     markedField2 = JSON.parse(JSON.stringify(markedField));
+
     // Setze die Hintergrundfarbe des markierten Feldes
     ctx.fillStyle = color;
     ctx.fillRect(x, y, cellSize, cellSize);
@@ -548,36 +553,31 @@ canvas.addEventListener("click", function(event) {
     var y = event.clientY - rect.top;
 
     // Berechne die Zeilen- und Spaltennummer des Feldes
-    var row = Math.floor(y / cellSize);
-    var column = Math.floor(x / cellSize);
+    var row = Math.floor(y / calcCellSize);
+    var column = Math.floor(x / calcCellSize);
 
     // Rufe eine Funktion auf, um das Feld zu markieren oder andere Aktionen durchzuführen
     console.log("CLICK" + isFixedCell(row, column));
     if (isSudokuSolved()) {
+        clearButton.style.backgroundColor = disabledButtonColor;
+        clearButton.style.pointerEvents = "none";
         showPopup();
         return;
     }
     resetColors();
+    markMatchingNumbers(row, column, matchingNumbersColor);
     if (!isFixedCell(row, column)) {
-
         markBox(row, column, rowColumnBoxColor);
         markRowAndColumn(row, column, rowColumnBoxColor);
-		markMatchingNumbers(row, column, matchingNumbersColor);
         markField(row, column, markedFieldColor);
-        if (isSudokuSolved()) {
-            showPopup();
-            return;
-        }
-    } else if (isFixedCell(row, column)) {markMatchingNumbers(row, column, matchingNumbersColor);}
-	
-    
+    }
     resetLines();
 });
 
 function markMatchingNumbers(row, column, color) {
     var index = row * maxLength + column;
     var value = sudokuData[index];
-    if (value !== " ") { // Updated condition
+    if (value !== " ") {
         for (var r = 0; r < maxLength; r++) {
             for (var c = 0; c < maxLength; c++) {
                 if (sudokuData[r * maxLength + c] === value) {
@@ -592,7 +592,6 @@ function markMatchingNumbers(row, column, color) {
 for (var i = 0; i < numberButtons.length; i++) {
     var numberButton = numberButtons[i];
     numberButton.addEventListener("click", function() { // Markiere die passenden Zahlen
-
         row = markedField2.row;
         column = markedField2.column;
         console.log(row, column);
@@ -603,12 +602,9 @@ for (var i = 0; i < numberButtons.length; i++) {
             resetColors();
             markBox(row, column, rowColumnBoxColor);
             markRowAndColumn(row, column, rowColumnBoxColor);
-
-
             // Schreibe die ausgewählte Zahl in das markierte Feld
             writeNumber(row, column, value);
             resetLines();
-
         }
     });
 }
@@ -631,6 +627,10 @@ function writeNumber(row, column, value) {
     sudokuData[row * maxLength + column] = value.toString();
     markMatchingNumbers(row, column, matchingNumbersColor);
     markField(row, column, markedFieldColor);
+    if (isSudokuSolved()) {
+        showPopup();
+        return;
+    }
 }
 
 
@@ -674,7 +674,10 @@ function checkIfValidPos(row, column) {
 
 // Eine Funktion, um alle Zahlen im Sudoku zu überprüfen und doppelte Zahlen rot zu markieren
 function checkIfValid() {
-    const { row: tempRow, column: tempColumn } = markedField;
+    const {
+        row: tempRow,
+        column: tempColumn
+    } = markedField;
     ifValidPopUp = true;
     // Überprüfe jede Zelle im Sudoku
     for (var row = 0; row < maxLength; row++) {
@@ -691,6 +694,9 @@ function checkIfValid() {
                 if (value !== " ") {
                     markField(row, c, invalidColor);
                     ifValidPopUp = false;
+                    if (getSolved && !isFixedCell(row, c)) {
+                        sudokuData[row * maxLength + c] = " ";
+                    }
                 }
             }
         }
@@ -700,6 +706,10 @@ function checkIfValid() {
                 if (value !== " ") {
                     markField(r, column, invalidColor);
                     ifValidPopUp = false;
+                    if (getSolved && !isFixedCell(r, column)) {
+                        sudokuData[r * maxLength + column] = " ";
+                    }
+
                 }
             }
         }
@@ -724,13 +734,16 @@ function checkIfValid() {
         }
     }
 
-    // Eine Hilfsfunktion, um alle Felder im gleichen 3x3-Kasten mit einer bestimmten Zahl zu markieren
+    // Alle Felder im gleichen 3x3-Kasten mit einer bestimmten Zahl zu markieren
     function markFieldsInBox(boxRow, boxColumn, number, color) {
         for (var i = boxRow; i < boxRow + 3; i++) {
             for (var j = boxColumn; j < boxColumn + 3; j++) {
                 if (sudokuData[i * maxLength + j] === number) {
                     markField(i, j, color);
                     ifValidPopUp = false;
+                    if (getSolved && !isFixedCell(i, j)) {
+                        sudokuData[i * maxLength + j] = " ";
+                    }
                 }
             }
         }
@@ -742,12 +755,21 @@ function checkIfValid() {
         popUpMessage.innerHTML = "Das Sudoku ist ungültig!";
     }
     showPopup();
-    markedField = { ...markedField, row: tempRow, column: tempColumn };
+    markedField = {
+        ...markedField,
+        row: tempRow,
+        column: tempColumn
+    };
     resetLines();
 }
 
 function solveSudoku() {
-    const { row: tempRow, column: tempColumn } = markedField;
+    getSolved = true;
+    checkIfValid();
+    const {
+        row: tempRow,
+        column: tempColumn
+    } = markedField;
     // Finde die nächste leere Zelle im Sudoku
     var emptyCell = findEmptyCell();
 
@@ -774,6 +796,8 @@ function solveSudoku() {
             // Wenn das Sudoku gelöst wurde, beende die Schleife und die Funktion
             if (isSudokuSolved()) {
                 popUpMessage.innerHTML = "Das Sudoku wurde gelöst!";
+                clearButton.style.backgroundColor = disabledButtonColor;
+                clearButton.style.pointerEvents = "none";
                 showPopup();
                 stopTimer()
                 return;
@@ -783,14 +807,19 @@ function solveSudoku() {
             sudokuData[row * maxLength + column] = " ";
         }
     }
-    markedField = { ...markedField, row: tempRow, column: tempColumn };
+    markedField = {
+        ...markedField,
+        row: tempRow,
+        column: tempColumn
+    };
+
 }
 
 // Eine Funktion, um die nächste leere Zelle im Sudoku zu finden
 function findEmptyCell() {
     for (var row = 0; row < maxLength; row++) {
         for (var column = 0; column < maxLength; column++) {
-            if (sudokuData[row * maxLength + column] === " ") {
+            if (sudokuData[row * maxLength + column] === " " || (!checkIfValidPos(row, column) && !isFixedCell())) {
                 return {
                     row: row,
                     column: column
@@ -830,12 +859,12 @@ function isValidNumber(row, column, number) {
 function isSudokuSolved() {
     for (var i = 0; i < maxLength; i++) {
         for (var j = 0; j < maxLength; j++) {
-            if (sudokuData[i * maxLength + j] === " ") {
+            if (sudokuData[i * maxLength + j] === " " || (!checkIfValidPos(i, j) && !isFixedCell())) {
                 return false;
             }
         }
     }
-    resetColors();
+    resetColors(); // Um das gelöste Sukodu zu laden
     resetLines();
     return true;
 }
@@ -898,4 +927,5 @@ window.addEventListener("load", startTimer);
 //- Sudoku Creator
 //- Notizfunktion
 //- Pause Funktion
+//- Besserer Button disable check
 </script>
