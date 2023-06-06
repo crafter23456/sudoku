@@ -1,252 +1,12 @@
+<?php 
+session_start();
+include 'login.php';
+include 'score.php';
+#include 'scoreboard.php';
+?>
 <html>
   <head>
-    <style>
-      :root {
-        --font: Montserrat, sans-serif;
-        --background-color: #f0f0f0;
-        --header-background-color: #333;
-        --header-text-color: white;
-        --footer-background-color: #333;
-        --footer-text-color: white;
-        --control-panel-button-background-color: #d1d1d1;
-        --control-panel-button-text-color: #333;
-        --control-panel-button-hover-background-color: #ccc;
-        --number-background-color: #d1d1d1;
-        --number-hover-background-color: #c9c9c9;
-        --popup-input-border-color: #ccc;
-        --popup-content-color: #eaeaea;
-        --popup-background-color: rgba(0, 0, 0, 0.5);
-        --popup-button-background-color: #4caf50;
-        --popup-button-hover-background-color: #45a049;
-      }
-
-      body {
-        font-family: var(--font);
-        background-color: var(--background-color);
-        margin: 0;
-        padding: 0;
-      }
-
-      header {
-        background-color: var(--header-background-color);
-        color: var(--header-text-color);
-        height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 20px;
-      }
-
-      header h1 {
-        font-size: 36px;
-      }
-
-      header ul {
-        list-style: none;
-        display: flex;
-      }
-
-      header li {
-        margin-left: 20px;
-      }
-
-      header a {
-        color: var(--header-text-color);
-        text-decoration: none;
-      }
-
-      footer {
-        background-color: var(--footer-background-color);
-        color: var(--footer-text-color);
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      main {
-        display: flex;
-        padding: 20px;
-		grid-gap: 20px;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-      }
-
-      canvas {
-        border: 1px solid black;
-      }
-
-      @media (max-width: 1400px) {
-        canvas {
-          width: 100%;
-          height: 100%;
-        }
-      }
-
-      @media (max-width: 1000px) {
-        canvas {
-          width: 750px;
-          height: 750px;
-        }
-        main {
-          flex-direction: column;
-        }
-        #panel {
-          width: 30rem;
-        }
-      }
-
-      .control-panel {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 20px;
-        border-radius: 40px;
-        flex-direction: row;
-        justify-content: center;
-      }
-
-      .control-panel button {
-        user-select: none;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 40px;
-        background-color: var(--control-panel-button-background-color);
-        color: var(--control-panel-button-text-color);
-        font-size: 14px;
-        font-family: var(--font);
-        font-weight: bold;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        width: 6rem;
-        height: 4rem;
-      }
-
-      .control-panel button:hover {
-        background-color: var(--control-panel-button-hover-background-color);
-      }
-
-      .number-selector {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-gap: 10px 0px;
-        justify-items: center;
-        align-items: center;
-      }
-
-      .number {
-        user-select: none;
-        width: 8rem;
-        height: 8rem;
-        background-color: var(--number-background-color);
-        border-radius: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 35px;
-        margin: 1%;
-      }
-
-      .number:hover {
-        transition: background-color 0.3s ease;
-        background-color: var(--number-hover-background-color) !important;
-      }
-
-      .login-container {
-        width: 300px;
-        padding: 20px;
-        border-radius: 5px;
-        background-color: var(--popup-content-color);
-        text-align: center;
-      }
-
-      .login-container h1 {
-        font-size: 24px;
-        margin-bottom: 20px;
-      }
-
-      .login-container form {
-        display: grid;
-        grid-gap: 10px;
-        text-align: left;
-      }
-
-      .login-container label {
-        font-weight: bold;
-      }
-
-      .login-container input[type="text"],
-      .login-container input[type="password"] {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid var(--popup-input-border-color);
-        border-radius: 4px;
-      }
-
-      .popup-content button, .login-container input[type='submit'] {
-        padding: 10px;
-        border: none;
-        border-radius: 4px;
-        background-color: var(--popup-button-background-color);
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-      }
-
-      .popup-content button:hover, .login-container input[type="submit"]:hover {
-        background-color: var(--popup-button-hover-background-color);
-      }
-
-      #overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: var(--popup-background-color);
-        z-index: 9999;
-        display: none;
-      }
-
-      .popup-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: var(--popup-background-color);
-        z-index: 999;
-        user-select: none;
-      }
-
-      .popup-content {
-        width: 300px;
-        padding: 20px;
-        border-radius: 5px;
-        background-color: var(--popup-content-color);
-        text-align: center;
-      }
-
-      .popup-content p {
-        font-size: 24px;
-        margin-bottom: 20px;
-      }
-
-      .timer {
-        font-size: 24px;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        user-select: none;
-      }
-    </style>
+    <link rel="stylesheet" href="style.css">
     <title>Sudoku</title>
 	<meta name="viewport" content="user-scalable=no">
   </head>
@@ -258,12 +18,16 @@
       <h1>Sudoku</h1>
       <span id="sudokuIdElement"></span>
       <ul>
+        <li id="loginName"><?php echo isset($_SESSION['username']) ? $_SESSION['username'] : ''; ?></li>
         <li>
-          <a href="#" onclick="showLoginPopup()">Login</a>
+          <a id="loginButton" href="<?php echo isset($_SESSION['username']) ? 'index.php?logout' : '#'; ?>" onclick="showLoginPopup()">
+          <?php echo isset($_SESSION['username']) ? 'Logout' : 'Login'; ?>
+          </a>
         </li>
       </ul>
     </header>
     <main>
+	  <?php //include 'scoreboard.php';?>
       <div>
         <canvas id="sudoku-canvas" width="900px" height="900px"></canvas>
       </div>
@@ -291,13 +55,15 @@
       </div>
       <div class="popup-container" id="loginPopup" style="display: none;">
         <div class="login-container">
-          <h1>Login</h1>
-          <form action="login.php" method="POST">
+          <h1><?php echo isset($loginLogout) ? $loginLogout : 'Login'; ?></h1>
+          <form action="" method="POST">
             <label for="username">Benutzername:</label>
             <input type="text" id="username" name="username" required>
             <label for="password">Passwort:</label>
             <input type="password" id="password" name="password" required>
-            <input type="submit" value="Anmelden">
+            <input type="submit" name="submit" value="Anmelden">
+            <b id="registerAd">Neu hier?</b>
+            <input type="submit" id="register" name="register" value="Registrieren">
           </form>
         </div>
       </div>
@@ -310,8 +76,6 @@
       </div>
     </main>
     <footer> &copy; 2023 Sudoku-Website. Alle Rechte vorbehalten. </footer>
-  </body>
-</html>
 
 <script>
 // Konstanten
@@ -355,7 +119,7 @@ var markedField = {
 };
 var markedField2 = JSON.parse(JSON.stringify(markedField));
 var request = new XMLHttpRequest();
-
+var sudokuId;
 ctx.fillStyle = bgColor;
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 ctx.strokeStyle = lineColor;
@@ -383,7 +147,7 @@ request.onload = function() {
         sudokuData = JSON.parse(JSON.stringify(sudokuDataRaw));
         drawNumbers();
         console.log(randomIndex);
-        var sudokuId = randomIndex + 1; // Index beginnt bei 0, deshalb +1
+        sudokuId = randomIndex + 1; // Index beginnt bei 0, deshalb +1
 
         sudokuIdElement.innerText = "Sudoku ID: " + sudokuId;
     }
@@ -392,7 +156,7 @@ request.send();
 
 window.addEventListener('resize', handleResize);
 
-function handleResize(){
+function handleResize() {
     canvasStyle = window.getComputedStyle(canvas);
     canvasWidth = parseInt(canvasStyle.getPropertyValue("width"), 10);
     calcCellSize = canvasWidth / maxLength;
@@ -628,7 +392,9 @@ function writeNumber(row, column, value) {
     markMatchingNumbers(row, column, matchingNumbersColor);
     markField(row, column, markedFieldColor);
     if (isSudokuSolved()) {
+        popUpMessage.innerHTML = "Das Sudoku wurde gelöst!";
         showPopup();
+        stopTimer();
         return;
     }
 }
@@ -775,6 +541,7 @@ function solveSudoku() {
 
     // Wenn keine leere Zelle gefunden wurde, ist das Sudoku gelöst
     if (!emptyCell) {
+        popUpMessage.innerHTML = "Das Sudoku wurde gelöst!";
         showPopup();
         stopTimer();
         return;
@@ -790,7 +557,7 @@ function solveSudoku() {
             // Setze die Zahl in die aktuelle Zelle
             sudokuData[row * maxLength + column] = number.toString();
 
-            // Löse das Sudoku rekursiv, indem du zur nächsten leeren Zelle gehst
+            // Löse das Sudoku rekursiv, indem man zur nächsten leeren Zelle gehst
             solveSudoku();
 
             // Wenn das Sudoku gelöst wurde, beende die Schleife und die Funktion
@@ -799,8 +566,9 @@ function solveSudoku() {
                 clearButton.style.backgroundColor = disabledButtonColor;
                 clearButton.style.pointerEvents = "none";
                 showPopup();
-                stopTimer()
-                return;
+                stopTimer();
+                //return;
+                continue;
             }
 
             // Wenn das Sudoku nicht gelöst wurde, setze die Zelle zurück und probiere die nächste Zahl
@@ -870,7 +638,11 @@ function isSudokuSolved() {
 }
 
 function showLoginPopup() {
-    loginPopup.style.display = "flex";
+    <
+    ? php
+    if (!isset($_SESSION['username'])): ? >
+        loginPopup.style.display = "flex"; <
+    ? php endif; ? >
 }
 
 window.addEventListener("click", function(event) {
@@ -915,17 +687,40 @@ function updateTimer() {
 
 // Stop timer function
 function stopTimer() {
-    clearInterval(timerInterval);
+    clearInterval(timerInterval); <
+    ? php $end = microtime(true); ? >
+    //$.ajax({
+    //	type: "POST",
+    //	url: "score.php",
+    //	data: { sudokuId: sudokuId },
+    //	success:success
+    //});
+    request.open("POST", "score.php", true);
+    request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    request.send("sudokuId=" + sudokuId);
 }
 
 // Add event listener to start timer when the page loads
 window.addEventListener("load", startTimer);
 
+function receiveMessagePopup() {
+    popUpMessage.innerHTML = < ? php echo json_encode($message); ? > ;
+    showPopup();
+}
 // TODO:
-//- Login
 //- Stats
 //- Sudoku Creator
 //- Notizfunktion
 //- Pause Funktion
 //- Besserer Button disable check
 </script>
+
+<?php 
+if ($showPopup) {
+    echo "<script>receiveMessagePopup();</script>";
+    $showPopup = false;
+}
+?>
+
+</body>
+</html>
