@@ -205,6 +205,11 @@
      font-size: 24px;
      margin-bottom: 20px;
 }
+
+ .popup-hidden {
+    display: none;
+}
+
  .timer {
      font-size: 24px;
      margin-bottom: 10px;
@@ -216,4 +221,15 @@
 }
  #passwordcheck {
      display: none;
+}
+
+.scoreboard p {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.scoreboard th, .scoreboard td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
 }

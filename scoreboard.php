@@ -3,8 +3,8 @@ include_once 'connections.php';
 
 $sql = "SELECT userId, elapsedTime FROM scores ORDER BY elapsedTime ASC";
 $result = getConn()->query($sql);
-
-echo "<h2>Scoreboard</h2>";
+echo "<div class='scoreboard'>"
+echo "<p>Scoreboard</h2>";
 echo "<table>";
 echo "<tr><th>User</th><th>TopTime</th></tr>";
 
@@ -17,4 +17,5 @@ if ($result->num_rows > 0) {
 }
 
 echo "</table>";
+echo "</div>"
 ?>
