@@ -26,7 +26,7 @@ include 'score.php';
       </ul>
     </header>
     <main>
-	  <?php //include 'scoreboard.php';?>
+      <?php //include 'scoreboard.php';?>
       <div>
         <canvas id="sudoku-canvas" width="900px" height="900px"></canvas>
       </div>
@@ -48,13 +48,13 @@ include 'score.php';
           <div class="number" data-value="7">7</div>
           <div class="number" data-value="8">8</div>
           <div class="number" data-value="9">9</div>
-		  <div></div>
-		  <div class="number" id="clear" data-value=" ">Clear</div>
+          <div></div>
+          <div class="number" id="clear" data-value=" ">Clear</div>
         </div>
       </div>
       <div class="popup-container popup-hidden" id="loginPopup">
         <div class="login-container">
-          <h1><?php echo isset($loginLogout) ? $loginLogout : 'Login'; ?></h1>
+          <h1> <?php echo isset($loginLogout) ? $loginLogout : 'Login'; ?> </h1>
           <form action="" method="POST">
             <label for="username">Benutzername:</label>
             <input type="text" id="username" name="username" required>
@@ -75,7 +75,7 @@ include 'score.php';
       </div>
     </main>
     <footer> &copy; 2023 Sudoku-Website. Alle Rechte vorbehalten. </footer>
-</body>
+  </body>
 </html>
 <script>
 // Konstanten
@@ -130,27 +130,20 @@ resetLines();
 
 request.open("GET", filename, true);
 request.onload = function() {
-    if (request.status >= 200 && request.status < 400) {
-        // Konvertiere die Daten in ein Array von Zahlen und Leerzeichen
-        var sudokuText = request.responseText;
-        var chunkSize = 164;
-        var numChunks = Math.ceil(sudokuText.length / chunkSize);
-
-        for (var i = 0; i < numChunks; i++) {
-            var start = i * chunkSize;
-            var chunk = sudokuText.substr(start, chunkSize);
-            var sudokuDataPart = chunk.split(";");
-            sudokuDataSplit.push(sudokuDataPart);
-        }
-
-        var randomIndex = Math.floor(Math.random() * sudokuDataSplit.length); // Zufälliger Index auswählen
-        sudokuDataRaw = sudokuDataSplit[randomIndex];
-        sudokuData = JSON.parse(JSON.stringify(sudokuDataRaw));
-        drawNumbers();
-        console.log(randomIndex);
-        sudokuId = randomIndex + 1; // Index beginnt bei 0, deshalb +1
-        sudokuIdElement.textContent = "Sudoku ID: " + sudokuId;
-    }
+  if (request.status === 200) {
+    let sudokuText = request.responseText;
+    let chunkSize = 164;
+    let numChunks = Math.ceil(sudokuText.length / chunkSize);
+    let randomIndex = Math.floor(Math.random() * numChunks);
+    let start = randomIndex * chunkSize;
+    let chunk = sudokuText.slice(start, start + chunkSize);
+    sudokuDataRaw = chunk.split(";");
+    sudokuData = JSON.parse(JSON.stringify(sudokuDataRaw));
+    drawNumbers();
+    console.log("ID: " + randomIndex + " von " + numChunks);
+    sudokuId = randomIndex + 1;
+    sudokuIdElement.textContent = `Sudoku ID: ${sudokuId}`;
+  }
 };
 request.send();
 window.addEventListener('resize', handleResize);
@@ -242,7 +235,7 @@ function markField(row, column, color) {
 
     // Setze die Hintergrundfarbe des markierten Feldes
     ctx.fillStyle = color;
-    ctx.fillRectfillRect(x, y, cellSize, cellSize);
+    ctx.fillRect(x, y, cellSize, cellSize);
 
     // Zeichne die Linien um das markierte Feld herum, um den Rahmen beizubehalten
     // ctx.strokeRect(x, y, cellSize, cellSize);
@@ -659,12 +652,6 @@ window.addEventListener("load", startTimer);
 function receiveMessagePopup() {
     showPopup(<?php echo json_encode($message); ?>);
 }
-// TODO:
-//- Stats
-//- Sudoku Creator
-//- Notizfunktion
-//- Pause Funktion
-//- Besseren Button disable check
 </script>
 
 <?php
