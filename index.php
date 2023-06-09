@@ -7,7 +7,7 @@ include 'score.php';
   <head>
     <link rel="stylesheet" href="style.css">
     <title>Sudoku</title>
-	<meta name="viewport" content="user-scalable=no">
+    <meta name="viewport" content="user-scalable=no">
   </head>
   <body>
     <header>
@@ -26,7 +26,7 @@ include 'score.php';
       </ul>
     </header>
     <main>
-      <?php //include 'scoreboard.php';?>
+      <?php include 'scoreboard.php';?>
       <div>
         <canvas id="sudoku-canvas" width="900px" height="900px"></canvas>
       </div>
@@ -107,6 +107,7 @@ const sudokuNotValidMessage = "Das Sudoku ist ungültig!";
 // Variablen
 let startTime;
 let timerInterval;
+let timerStopped = false;
 var getSolved = false;
 var ctx = canvas.getContext("2d");
 var canvasStyle = window.getComputedStyle(canvas);
@@ -122,6 +123,7 @@ var markedField = {
 };
 var markedField2 = JSON.parse(JSON.stringify(markedField));
 var request = new XMLHttpRequest();
+var timeRequest = new XMLHttpRequest();
 var sudokuId;
 
 ctx.fillStyle = bgColor;
@@ -140,8 +142,8 @@ request.onload = function() {
     sudokuDataRaw = chunk.split(";");
     sudokuData = JSON.parse(JSON.stringify(sudokuDataRaw));
     drawNumbers();
-    console.log("ID: " + randomIndex + " von " + numChunks);
     sudokuId = randomIndex + 1;
+    console.log("ID: " + sudokuId + " von " + numChunks);
     sudokuIdElement.textContent = `Sudoku ID: ${sudokuId}`;
   }
 };
@@ -258,7 +260,7 @@ function markField(row, column, color) {
 function markRowAndColumn(row, column, color) {
     iterateCells(function(i, j) {
         markField(i, column, color);
-		markField(row, j, color);
+        markField(row, j, color);
     });
 }
 
@@ -290,6 +292,13 @@ function updateButtonColors() {
     }
 }
 
+function handleSolve(){
+    clearButton.style.backgroundColor = disabledButtonColor;
+    clearButton.style.pointerEvents = "none";
+    stopTimer();
+    showPopup(sudokuSolvedMessage);
+}
+
 canvas.addEventListener("click", function(event) {
     // Berechne die Position des Klicks relativ zum Canvas
     var rect = canvas.getBoundingClientRect();
@@ -303,9 +312,7 @@ canvas.addEventListener("click", function(event) {
     // Rufe eine Funktion auf, um das Feld zu markieren oder andere Aktionen durchzuführen
     console.log("CLICK" + isFixedCell(row, column));
     if (isSudokuSolved()) {
-        clearButton.style.backgroundColor = disabledButtonColor;
-        clearButton.style.pointerEvents = "none";
-        showPopup(sudokuSolvedMessage);
+        handleSolve();
         return;
     }
     resetColors();
@@ -369,8 +376,7 @@ function writeNumber(row, column, value) {
     markMatchingNumbers(row, column, matchingNumbersColor);
     markField(row, column, markedFieldColor);
     if (isSudokuSolved()) {
-        showPopup(sudokuSolvedMessage);
-        stopTimer();
+        handleSolve();
         return;
     }
 }
@@ -476,7 +482,7 @@ function checkIfValid() {
 
     showPopup(ifValidPopUp ? sudokuValidMessage : sudokuNotValidMessage);
 
-	markedField2 = {
+    markedField2 = {
         ...markedField2,
         row: tempRow,
         column: tempColumn
@@ -496,8 +502,7 @@ function solveSudoku() {
 
     // Wenn keine leere Zelle gefunden wurde, ist das Sudoku gelöst
     if (!emptyCell) {
-        showPopup(sudokuSolvedMessage);
-        stopTimer();
+        handleSolve();
         return;
     }
 
@@ -516,10 +521,7 @@ function solveSudoku() {
 
             // Wenn das Sudoku gelöst wurde, beende die Schleife und die Funktion
             if (isSudokuSolved()) {
-                clearButton.style.backgroundColor = disabledButtonColor;
-                clearButton.style.pointerEvents = "none";
-                showPopup(sudokuSolvedMessage);
-                stopTimer();
+                handleSolve();
                 return;
             }
 
@@ -537,7 +539,7 @@ function solveSudoku() {
 
 // Nächste leere Zelle im Sudoku finden
 function findEmptyCell() {
-	var result = false;
+    var result = false;
     iterateCells(function(row, column) {
         if (sudokuData[row * maxLength + column] === " " || (!checkIfValidPos(row, column) && !isFixedCell())) {
                 result = {row, column};
@@ -634,17 +636,16 @@ function updateTimer() {
 
 // Stop timer
 function stopTimer() {
+  if (!timerStopped) {
+    timerStopped = true;
+    var elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
     clearInterval(timerInterval);
-    <?php $end = microtime(true); ?>
-    //$.ajax({
-    //	type: "POST",
-    //	url: "score.php",
-    //	data: { sudokuId: sudokuId },
-    //	success:success
-    //});
-    request.open("POST", "score.php", true);
-    request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    request.send("sudokuId=" + sudokuId);
+	if (!getSolved) {
+        timeRequest.open("POST", "score.php", true);
+        timeRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        timeRequest.send(`sudokuId=${sudokuId}&elapsedTime=${elapsedTime}`);
+	}
+  }
 }
 
 window.addEventListener("load", startTimer);

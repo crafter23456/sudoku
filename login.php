@@ -10,26 +10,30 @@ if (isset($_GET['logout'])) {
 }
 
 if (isset($_POST['submit'])) {
-	$password = $_POST['password'];
-	$username = $_POST['username'];
-	login($username, $password);
-	$showPopup = true;
+    $password = $_POST['password'];
+    $username = $_POST['username'];
+    if (!isset($_SESSION['username'])) {
+        login($username, $password);
+        $showPopup = true;
+    }
 }
 
 if (isset($_POST['register'])) {
-	$password = $_POST['password'];
-	$psw_hash = password_hash($password, PASSWORD_DEFAULT);
-	$username = $_POST['username'];
-	register($username, $psw_hash);
-	$showPopup = true;
+    $password = $_POST['password'];
+    $username = $_POST['username'];
+    if (!isset($_SESSION['username'])) {
+        register($username, $password);
+        $showPopup = true;
+    }
+
 }
 
 function login($username, $password) {
-	global $message;
-    $sql = "SELECT * FROM login_data WHERE username = '$username'";
+    global $message;
+    $sql = "SELECT * FROM loginData WHERE username = '$username'";
     $result = getConn()->query($sql);
     $row = $result->fetch_assoc();
-    if ($result->num_rows > 0 && password_verify($password, $row['password'])) {
+    if (password_verify($password, $row['password'])) {
         $_SESSION['username'] = $username;
         $message = "Login successful!";
         $loginLogout = "Logout";
@@ -41,13 +45,13 @@ function login($username, $password) {
 }
 
 function register($username, $password) {
-	global $message;
-    $login = "SELECT * FROM login_data WHERE username = '$username'";
+    global $message;
+    $login = "SELECT * FROM loginData WHERE username = '$username'";
     $result = getConn()->query($login);
 
     if ($result->num_rows == 0) {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $sql = "INSERT INTO login_data (username, password) VALUES ('$username', '$hashedPassword')";
+        $sql = "INSERT INTO loginData (username, password) VALUES ('$username', '$hashedPassword')";
         $registrationResult = getConn()->query($sql);
         
         if ($registrationResult) {
