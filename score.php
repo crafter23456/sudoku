@@ -4,7 +4,7 @@ include_once 'connections.php';
 
 if (isset($_POST['sudokuId'])) {
     $sudokuId = $_POST["sudokuId"];
-	$elapsedTime = $_POST["elapsedTime"];
+    $elapsedTime = $_POST["elapsedTime"];
     date_default_timezone_set('Europe/Berlin');
     $currentTime = date('Y-m-d H:i:s');
     $username = $_SESSION['username'];
