@@ -1,7 +1,7 @@
 <?php
-session_start();
+if (session_status() == PHP_SESSION_NONE) session_start();
 include_once 'connections.php';
-
+$_SESSION['sudokuIdFilter'] = null;
 if (isset($_POST['sudokuIdFilter'])) {
     $_SESSION['sudokuIdFilter'] = $_POST['sudokuIdFilter'];
 }
@@ -30,7 +30,9 @@ echo "<tr><th>Sudoku</th><th>User</th><th>TopTime</th></tr>";
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        echo "<tr><td>" . $row["sudokuId"] . "</td><td>" . $row["username"] . "</td><td>" . $row["elapsedTime"] . " sec</td></tr>";
+        $elapsedTime = $row["elapsedTime"];
+        $timeDisplay = ($elapsedTime > 60) ? number_format($elapsedTime / 60, 2) . " min" : $elapsedTime . " sec";
+        echo "<tr><td>" . $row["sudokuId"] . "</td><td>" . $row["username"] . "</td><td>" . $timeDisplay . "</td></tr>";
     }
 } else {
     echo "<tr><td colspan='3'>No ranking data available</td></tr>";
@@ -41,7 +43,7 @@ echo "</table>";
 <form method="POST" action="" autocomplete="off">
 <div class="filter-container">
     <label for="sudokuIdFilter">Enter Sudoku ID to filter:</label>
-    <input type="text" name="sudokuIdFilter" id="sudokuIdFilter" value="<?php echo $_SESSION['sudokuIdFilter']; ?>" required>
+    <input type="number" name="sudokuIdFilter" id="sudokuIdFilter" value="<?php echo $_SESSION['sudokuIdFilter']; ?>" required>
     <button type="submit">Show Scores</button>
     <button type="submit" name="clearFilter">Clear Filter</button></div>
 </form>
