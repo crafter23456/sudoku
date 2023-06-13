@@ -16,6 +16,8 @@
   --popup-background-color: rgba(0, 0, 0, 0.5);
   --popup-button-background-color: #4caf50;
   --popup-button-hover-background-color: #45a049;
+  --ranking-hover-color: #5d54a4;
+  --ranking-color: #551a8b;
 }
 body {
   font-family: var(--font);
@@ -176,7 +178,7 @@ canvas {
   outline: none;
 }
 #sudokuIdFilter {
-  width: 10%;
+  width: 12%;
 }
 .popup-content button,
 .login-container input[type="submit"] {
@@ -248,6 +250,15 @@ canvas {
   font-size: 24px;
   margin-bottom: 10px;
   text-align: center;
+}
+.scoreboard a {
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-weight: 700;
+  color: var(--ranking-color);
+}
+.scoreboard a:hover {
+  color: var(--ranking-hover-color);
 }
 .scoreboard th,
 .scoreboard td {
@@ -347,4 +358,18 @@ canvas {
   height: 120px;
   margin: 0 auto;
   transform: translate(-50%,-50%);
+}
+.ranking {
+  display:flex;
+  padding: 20px;
+  grid-gap: 20px;
+}
+.pagination span {
+  margin: 0 10px;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
 }

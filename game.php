@@ -58,6 +58,7 @@ let timerInterval;
 let timerStopped = false;
 let paused = false;
 let pausedTime = 0;
+let solved = false;
 var getSolved = false;
 var ctx = canvas.getContext("2d");
 var canvasStyle = window.getComputedStyle(canvas);
@@ -226,6 +227,7 @@ function handleSolve(){
     clearButton.classList.add("number-blocked");
     stopTimer();
     showPopup(sudokuSolvedMessage);
+    solved = true;
 }
 
 canvas.addEventListener("click", function(event) {
@@ -533,14 +535,14 @@ function pauseTimer() {
         paused = false;
         resetColors();
         startTime = Date.now() - pausedTime;
-        timerInterval = setInterval(updateTimer, 1000);
+        if (!solved) timerInterval = setInterval(updateTimer, 1000);
     } else {
         // Pause timer
         paused = true;
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        clearInterval(timerInterval);
         pausedTime = Date.now() - startTime;
+        if (!solved) clearInterval(timerInterval);
     }
     pauseButton.classList.toggle("paused");
     pauseOverlay.classList.toggle("showPauseOverlay");

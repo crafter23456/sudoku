@@ -2,4 +2,3 @@ TODO:
 - Sudoku Creator
 - Notizfunktion
 - Rewrite/ButtonDisableCheck (solve the sudoku in an array and check if all 9 places of the number matches)
-- Clicking on ranking, should filter
