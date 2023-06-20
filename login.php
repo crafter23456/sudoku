@@ -1,7 +1,7 @@
 <?php
 include_once 'connections.php';
 $showPopup = false;
-$message = "";
+$conn = getConn();
 
 if (isset($_GET['logout'])) {
     session_destroy();
@@ -9,29 +9,24 @@ if (isset($_GET['logout'])) {
     exit();
 }
 
-if (isset($_POST['submit'])) {
+if ((isset($_POST['submit']) || isset($_POST['register'])) && !isset($_SESSION['username'])) {
     $password = $_POST['password'];
     $username = $_POST['username'];
-    if (!isset($_SESSION['username'])) {
-        login($username, $password);
-        $showPopup = true;
+    $showPopup = true;
+
+    if (isset($_POST['submit'])) {
+        $message = login($username, $password, $conn);
+    } elseif (isset($_POST['register'])) {
+        $message = register($username, $password, $conn);
     }
 }
 
-if (isset($_POST['register'])) {
-    $password = $_POST['password'];
-    $username = $_POST['username'];
-    if (!isset($_SESSION['username'])) {
-        register($username, $password);
-        $showPopup = true;
-    }
-
-}
-
-function login($username, $password) {
-    global $message;
-    $sql = "SELECT * FROM loginData WHERE username = '$username'";
-    $result = getConn()->query($sql);
+function login($username, $password, $conn) {
+    $sql = "SELECT password FROM loginData WHERE username = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
     $row = $result->fetch_assoc();
     if (password_verify($password, $row['password'])) {
         $_SESSION['username'] = $username;
@@ -40,20 +35,22 @@ function login($username, $password) {
     } else {
         $message = "Invalid username or password!";
     }
-    getConn()->close();
+    $stmt->close();
     return $message;
 }
 
-function register($username, $password) {
-    global $message;
-    $login = "SELECT * FROM loginData WHERE username = '$username'";
-    $result = getConn()->query($login);
-
+function register($username, $password, $conn) {
+    $login = "SELECT username FROM loginData WHERE username = ?";
+    $stmt = $conn->prepare($login);
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
     if ($result->num_rows == 0) {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $sql = "INSERT INTO loginData (username, password) VALUES ('$username', '$hashedPassword')";
-        $registrationResult = getConn()->query($sql);
-        
+        $sql = "INSERT INTO loginData (username, password) VALUES (?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ss", $username, $hashedPassword);
+        $registrationResult = $stmt->execute();
         if ($registrationResult) {
             $_SESSION['username'] = $username;
             $message = "Registration successful!";
@@ -63,7 +60,8 @@ function register($username, $password) {
     } else {
         $message = "Username already exists!";
     }
-    getConn()->close();
+    $stmt->close();
     return $message;
 }
+$conn->close();
 ?>
