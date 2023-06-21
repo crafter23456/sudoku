@@ -10,17 +10,21 @@
   --control-panel-button-hover-background-color: #ccc;
   --number-background-color: #d1d1d1;
   --number-hover-background-color: #c9c9c9;
+  --number-disabled-color: #b2b2b2;
   --popup-input-border-color: #ccc;
   --popup-content-color: #eaeaea;
   --popup-background-color: rgba(0, 0, 0, 0.5);
   --popup-button-background-color: #4caf50;
   --popup-button-hover-background-color: #45a049;
+  --ranking-hover-color: #5d54a4;
+  --ranking-color: #551a8b;
 }
 body {
   font-family: var(--font);
   background-color: var(--background-color);
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 header {
   background-color: var(--header-background-color);
@@ -67,20 +71,20 @@ canvas {
 }
 @media (max-width: 1400px) {
   canvas {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
   }
 }
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
   canvas {
-    width: 800px;
-    height: 800px;
+  width: 800px;
+  height: 800px;
   }
   main {
-    flex-direction: column;
+  flex-direction: column;
   }
   #panel {
-    width: 30rem;
+  width: 30rem;
   }
 }
 .control-panel {
@@ -130,9 +134,16 @@ canvas {
   font-size: 35px;
   margin: 1%;
 }
+.number-blocked {
+  background-color: var(--number-disabled-color) !important;
+  pointer-events: none;
+}
 .number:hover {
   transition: background-color 0.3s ease;
-  background-color: var(--number-hover-background-color) !important;
+  background-color: var(--number-hover-background-color);
+}
+#loginButton:hover {
+  color: var(--number-hover-background-color);
 }
 .login-container {
   width: 300px;
@@ -154,11 +165,20 @@ canvas {
   font-weight: bold;
 }
 .login-container input[type="text"],
-.login-container input[type="password"] {
+.login-container input[type="password"],
+#sudokuIdFilter {
   width: 100%;
   padding: 8px;
   border: 1px solid var(--popup-input-border-color);
   border-radius: 4px;
+}
+.login-container input[type="text"]:focus,
+.login-container input[type="password"]:focus,
+#sudokuIdFilter:focus {
+  outline: none;
+}
+#sudokuIdFilter {
+  width: 12%;
 }
 .popup-content button,
 .login-container input[type="submit"] {
@@ -171,7 +191,8 @@ canvas {
   cursor: pointer;
 }
 .popup-content button:hover,
-.login-container input[type="submit"]:hover {
+.login-container input[type="submit"]:hover,
+.filter-container button:hover {
   background-color: var(--popup-button-hover-background-color);
 }
 #overlay {
@@ -211,26 +232,144 @@ canvas {
 .popup-hidden {
   display: none;
 }
-.timer {
-  font-size: 24px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  user-select: none;
-}
 #passwordcheck {
   display: none;
+}
+#scoreboard {
+  color: var(--header-text-color);
+  background-color: var(--header-background-color);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 18px;
+}
+#scoreboard:hover {
+  color: var(--number-hover-background-color);
 }
 .scoreboard p {
   font-size: 24px;
   margin-bottom: 10px;
   text-align: center;
 }
+.scoreboard a {
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-weight: 700;
+  color: var(--ranking-color);
+}
+.scoreboard a:hover {
+  color: var(--ranking-hover-color);
+}
 .scoreboard th,
 .scoreboard td {
   padding: 8px;
   text-align: left;
   border-bottom: 1px solid #ddd;
+}
+.scoreboard table {
+  padding-bottom: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+.filter-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.filter-container label {
+  font-weight: bold;
+}
+.filter-container input[type="text"] {
+  padding: 8px;
+  border: 1px solid var(--popup-input-border-color);
+  border-radius: 4px;
+}
+ .filter-container input[type="text"]:focus {
+  outline: none;
+}
+.filter-container button {
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--popup-button-background-color);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+.timer {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  user-select: none;
+}
+.timerBox {
+  display: flex;
+  justify-content: center;
+}
+#pauseButton {
+  user-select: none;
+  border: none;
+  border-radius: 30px;
+  background-color: var(--control-panel-button-background-color);
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-left: 1rem;
+}
+#pauseButton:hover {
+  background-color: var(--number-hover-background-color);
+}
+#pauseIcon, #resumeIcon {
+  display: none;
+}
+#pauseButton.paused #resumeIcon {
+  display: inline-block;
+}
+#pauseButton:not(.paused) #pauseIcon {
+  display: inline-block;
+}
+.showPauseOverlay {
+  display: block !important;
+}
+.gameContainer {
+  position: relative;
+}
+#pauseOverlay {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  cursor: pointer;
+  z-index: 10;
+  box-sizing: border-box;
+}
+.resumeIconBig {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  transform: translate(-50%,-50%);
+}
+.ranking {
+  display:flex;
+  padding: 20px;
+  grid-gap: 20px;
+}
+.pagination span {
+  margin: 0 10px;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
 }

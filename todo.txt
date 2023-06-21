@@ -1,6 +1,4 @@
 TODO:
 - Sudoku Creator
 - Notizfunktion
-- Pause Funktion
 - Rewrite/ButtonDisableCheck (solve the sudoku in an array and check if all 9 places of the number matches)
-- Move sudoku file in sql sudoku(sudokuId, sudokuContent) - faster
