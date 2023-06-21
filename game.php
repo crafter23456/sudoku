@@ -113,7 +113,8 @@ function resetColors() {
 
 function resetLines() {
     for (var i = 0; i <= maxLength; i++) {
-        var y = x = i * cellSize;
+        var x = i * cellSize;
+        var y = x;
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(canvas.width, y);
@@ -273,8 +274,8 @@ function markMatchingNumbers(row, column, color) {
 for (var i = 0; i < numberButtons.length; i++) {
     var numberButton = numberButtons[i];
     numberButton.addEventListener("click", function() {
-        row = markedField2.row;
-        column = markedField2.column;
+        var row = markedField2.row;
+        var column = markedField2.column;
         console.log(markedField2, markedField);
         if (markedField2 && !isFixedCell(row, column)) {
             var value = this.dataset.value;
@@ -344,7 +345,7 @@ function checkIfValid() {
         row: tempRow,
         column: tempColumn
     } = markedField2;
-    ifValidPopUp = true;
+    var ifValidPopUp = true;
 
     // Überprüfe jede Zelle im Sudoku
     iterateCells(function(r, c) {
@@ -479,7 +480,7 @@ function solveSudoku() {
 function findEmptyCell() {
     var result = false;
     iterateCells(function(row, column) {
-        if (sudokuData[row * maxLength + column] === " " || (!checkIfValidPos(row, column) && !isFixedCell())) {
+        if (sudokuData[row * maxLength + column] === " " || (!checkIfValidPos(row, column) && !isFixedCell(row, column))) {
                 result = {row, column};
         }
         return !result;
@@ -516,7 +517,7 @@ function isValidNumber(row, column, number) {
 function isSudokuSolved() {
     for (var i = 0; i < maxLength; i++) {
         for (var j = 0; j < maxLength; j++) {
-            if (sudokuData[i * maxLength + j] === " " || (!checkIfValidPos(i, j) && !isFixedCell())) {
+            if (sudokuData[i * maxLength + j] === " " || (!checkIfValidPos(i, j) && !isFixedCell(row, column))) {
                 return false;
             }
         }
@@ -578,8 +579,4 @@ function stopTimer() {
 }
 
 window.addEventListener("load", startTimer);
-
-function receiveMessagePopup() {
-    showPopup(<?php echo json_encode($message); ?>);
-}
 </script>

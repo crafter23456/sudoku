@@ -47,33 +47,31 @@ function drawTableData($result, $personal = '') {
     echo "</table>";
 }
 
-function drawPaginator($page, $totalPages) {
+function drawPaginator($page, $totalPages, $personal) {
+    $rankingPage = filter_var($_GET['page'] ?? 1, FILTER_SANITIZE_NUMBER_INT);
+    $rankingPPage = filter_var($_GET['ppage'] ?? 1, FILTER_SANITIZE_NUMBER_INT);
     echo "<div class='pagination'>";
     if ($page > 1) {
         $prevPage = $page - 1;
-        echo generatePaginationLink($prevPage, $ppage, 'Previous');
+        $prevLink = ($personal == 'personal') ? "?page=$rankingPage&ppage=$prevPage" : "?page=$prevPage&ppage=$rankingPPage";
+        echo "<a href='$prevLink'>Previous</a>";
     }
 
-    if (!$totalPages == 0) echo "<span>Page $page of $totalPages</span>";
+    if (!$totalPages == 0) {
+        echo "<span>Page $page of $totalPages</span>";
+    }
 
     if ($page < $totalPages) {
         $nextPage = $page + 1;
-        echo generatePaginationLink($nextPage, $ppage, 'Next');
+        $nextLink = ($personal == 'personal') ? "?page=$rankingPage&ppage=$nextPage" : "?page=$nextPage&ppage=$rankingPPage";
+        echo "<a href='$nextLink'>Next</a>";
     }
+
     echo "</div>";
 }
 
-function generatePaginationLink($page, $ppage, $label) {
-    $url = "?page=$page";
-    if (!empty($ppage)) {
-        $url .= "&ppage=$ppage";
-    }
-    return "<a href='$url'>$label</a>";
-}
-
-$ppage = isset($_GET['ppage']) ? $_GET['ppage'] : 1;
-$page = isset($_GET['page']) ? $_GET['page'] : 1;
-
+$page = filter_var($_GET['page'] ?? 1, FILTER_SANITIZE_NUMBER_INT);
+$ppage = filter_var($_GET['ppage'] ?? 1, FILTER_SANITIZE_NUMBER_INT);
 $limit = 10;
 
 function getData($page, $filterCondition, $limit, $personal = '') {
@@ -83,7 +81,7 @@ function getData($page, $filterCondition, $limit, $personal = '') {
     $totalPages = ceil($totalCount / $limit);
     $result = getConn()->query(getRows($filterCondition, $limit, $offset));
     drawTableData($result, $personal);
-    drawPaginator($page, $totalPages);
+    drawPaginator($page, $totalPages, $personal);
 }
 
 echo "<div class='ranking'>";

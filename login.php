@@ -2,6 +2,7 @@
 include_once 'connections.php';
 $showPopup = false;
 $conn = getConn();
+$message = '';
 
 if (isset($_GET['logout'])) {
     session_destroy();
