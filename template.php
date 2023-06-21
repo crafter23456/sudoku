@@ -79,10 +79,14 @@ function closePopup() {
 closeButton.addEventListener("click", closePopup);
 
 // Popup & LoginField schließen, wenn irgendwo hingeklickt wird
-window.addEventListener("click", function(event) {
+window.addEventListener("mousedown", function(event) {
     if (event.target == popupContainer) closePopup();
     if (event.target == loginPopup) loginPopup.classList.toggle("popup-hidden");
 });
+
+function receiveMessagePopup() {
+    showPopup(<?php echo json_encode($message); ?>);
+}
 </script>
 
 <?php

@@ -2,12 +2,8 @@
 if (session_status() == PHP_SESSION_NONE) session_start();
 include_once 'connections.php';
 
-if (isset($_POST['sudokuIdFilter'])) {
-    $_SESSION['sudokuIdFilter'] = $_POST['sudokuIdFilter'];
-}
-
-if (isset($_GET['sudokuId'])) {
-    $_SESSION['sudokuIdFilter'] = $_GET['sudokuId'];
+if (isset($_POST['sudokuIdFilter']) || isset($_GET['sudokuId'])) {
+    $_SESSION['sudokuIdFilter'] = $_POST['sudokuIdFilter'] ?? $_GET['sudokuId'];
     header("Location: {$_SERVER['PHP_SELF']}");
 }
 
@@ -16,7 +12,7 @@ if (isset($_POST['clearFilter'])) {
     header("Location: {$_SERVER['PHP_SELF']}");
 }
 
-$filterCondition = isset($_SESSION['sudokuIdFilter']) ? "WHERE scores.sudokuId = '{$_SESSION['sudokuIdFilter']}'" : '';
+$filterCondition = $_SESSION['sudokuIdFilter'] ? "WHERE scores.sudokuId = '{$_SESSION['sudokuIdFilter']}'" : '';
 
 function getPages($filter) {
     return "SELECT COUNT(*) as total FROM scores INNER JOIN loginData ON scores.userId = loginData.userId $filter";
@@ -57,7 +53,7 @@ function drawPaginator($page, $totalPages, $personal) {
         echo "<a href='$prevLink'>Previous</a>";
     }
 
-    if (!$totalPages == 0) {
+    if ($totalPages !== 0) {
         echo "<span>Page $page of $totalPages</span>";
     }
 
