@@ -12,7 +12,7 @@ if (isset($_POST['clearFilter'])) {
     header("Location: {$_SERVER['PHP_SELF']}");
 }
 
-$filterCondition = $_SESSION['sudokuIdFilter'] ? "WHERE scores.sudokuId = '{$_SESSION['sudokuIdFilter']}'" : '';
+$filterCondition = isset($_SESSION['sudokuIdFilter']) ? "WHERE scores.sudokuId = '{$_SESSION['sudokuIdFilter']}'" : '';
 
 function getPages($filter) {
     return "SELECT COUNT(*) as total FROM scores INNER JOIN loginData ON scores.userId = loginData.userId $filter";
@@ -27,43 +27,47 @@ function getRows($filter, $limit, $offset) {
 }
 
 function drawTableData($result, $personal = '') {
-    echo "<div class='scoreboard'>";
-    echo "<p>" . ($personal ? "Personal Ranking" : "Ranking") . "</p>";
-    echo "<table>";
-    echo "<tr><th>Sudoku</th><th>User</th><th>TopTime</th></tr>";
+    $tableHtml = "<div class='scoreboard'>";
+    $tableHtml .= "<p>" . ($personal ? "Personal Ranking" : "Ranking") . "</p>";
+    $tableHtml .= "<table>";
+    $tableHtml .= "<tr><th>Sudoku</th><th>User</th><th>TopTime</th></tr>";
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             $elapsedTime = $row["elapsedTime"];
             $timeDisplay = ($elapsedTime > 60) ? gmdate("i:s", $elapsedTime) . " min" : gmdate("s", $elapsedTime) . " sec";
-            echo "<tr><td><a href='?sudokuId={$row["sudokuId"]}'>" . $row["sudokuId"] . "</td><td>" . $row["username"] . "</td><td>" . $timeDisplay . "</td></tr>";
+            $tableHtml .= "<tr><td><a href='?sudokuId={$row["sudokuId"]}'>" . $row["sudokuId"] . "</td><td>" . $row["username"] . "</td><td>" . $timeDisplay . "</td></tr>";
         }
     } else {
-        echo "<tr><td colspan='3'>No ranking data available</td></tr>";
+        $tableHtml .= "<tr><td colspan='3'>No ranking data available</td></tr>";
     }
-    echo "</table>";
+    $tableHtml .= "</table>";
+    echo $tableHtml;
+}
+
+function generatePaginationLink($queryParams, $page, $personal, $offset) {
+    $queryParams['page'] = $personal == 'personal' ? $queryParams['page'] : $page + $offset;
+    $queryParams['ppage'] = $personal == 'personal' ? $page + $offset : $queryParams['ppage'];
+    return '?' . http_build_query($queryParams);
 }
 
 function drawPaginator($page, $totalPages, $personal) {
-    $rankingPage = filter_var($_GET['page'] ?? 1, FILTER_SANITIZE_NUMBER_INT);
-    $rankingPPage = filter_var($_GET['ppage'] ?? 1, FILTER_SANITIZE_NUMBER_INT);
-    echo "<div class='pagination'>";
+    $queryParams = $_GET;
+    $paginationHtml = "<div class='pagination'>";
+
     if ($page > 1) {
-        $prevPage = $page - 1;
-        $prevLink = ($personal == 'personal') ? "?page=$rankingPage&ppage=$prevPage" : "?page=$prevPage&ppage=$rankingPPage";
-        echo "<a href='$prevLink'>Previous</a>";
+        $paginationHtml .= "<a href='" . generatePaginationLink($queryParams, $page, $personal, -1) . "'>Previous</a>";
     }
 
     if ($totalPages !== 0) {
-        echo "<span>Page $page of $totalPages</span>";
+        $paginationHtml .= "<span>Page $page of $totalPages</span>";
     }
 
     if ($page < $totalPages) {
-        $nextPage = $page + 1;
-        $nextLink = ($personal == 'personal') ? "?page=$rankingPage&ppage=$nextPage" : "?page=$nextPage&ppage=$rankingPPage";
-        echo "<a href='$nextLink'>Next</a>";
+        $paginationHtml .= "<a href='" . generatePaginationLink($queryParams, $page, $personal, 1) . "'>Next</a>";
     }
 
-    echo "</div>";
+    $paginationHtml .= "</div>";
+    echo $paginationHtml;
 }
 
 $page = filter_var($_GET['page'] ?? 1, FILTER_SANITIZE_NUMBER_INT);

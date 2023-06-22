@@ -19,16 +19,16 @@ if ((isset($_POST['submit']) || isset($_POST['register'])) && !isset($_SESSION['
     } elseif (isset($_POST['register'])) {
         if (validateUsername($username) && validatePassword($password)) {
             $message = register($username, $password, $conn);
-        } else $message = "Username must contain only letters and numbers and password must be at least 8 characters long and contain uppercase and lowercase letters and one number";
+        } else $message = "Username: letters and numbers only. Password: min 8 characters, upper and lower case letters, and one number.";
     }
 }
 
 function validateUsername($username) {
-    return preg_match('/^[a-zA-Z0-9]+$/', $username);
+    return ctype_alnum($username);
 }
 
 function validatePassword($password) {
-    return strlen($password) >= 8 && preg_match('/[A-Z]/', $password) && preg_match('/[a-z]/', $password) && preg_match('/[0-9]/', $password);
+    return strlen($password) >= 8 && preg_match('/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/', $password);
 }
 
 function login($username, $password, $conn) {

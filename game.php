@@ -226,11 +226,9 @@ function updateButtonColors() {
 
 function handleSolve(){
     clearButton.classList.add("number-blocked");
+    if (paused) pauseTimer();
     stopTimer();
-    pauseButton.classList.remove("paused");
-    pauseOverlay.classList.remove("showPauseOverlay");
     showPopup(sudokuSolvedMessage);
-    paused = false;
     solved = true;
 }
 
